@@ -14,7 +14,7 @@ export default function NotebookHistory() {
 				{studyEntries.map((entry) => (
 					<div
 						key={entry.date}
-						className="grid gap-4 border-t border-black/10 pt-6 first:border-t-0 first:pt-0 md:grid-cols-[90px_minmax(0,1fr)]"
+						className="grid gap-4 border-t border-black/10 pt-6 first:border-t-0 first:pt-0 md:grid-cols-[90px_minmax(0,1fr)_72px]"
 					>
 						<p className="text-sm text-black/48">{entry.date}</p>
 						<div>
@@ -23,6 +23,9 @@ export default function NotebookHistory() {
 								{entry.excerpt}
 							</p>
 						</div>
+						<p className="text-sm text-black/48">
+							{entry.mood}/{entry.energy}/{entry.progress}
+						</p>
 					</div>
 				))}
 			</div>

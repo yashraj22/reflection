@@ -14,6 +14,12 @@ export default function NotebookDashboard() {
 					Dashboard
 				</h1>
 				<div className="mt-8 grid gap-4">
+					<div className="grid grid-cols-[44px_1fr_1fr_1fr] gap-3 text-xs text-black/45">
+						<span>Day</span>
+						<span>Mood</span>
+						<span>Energy</span>
+						<span>Progress</span>
+					</div>
 					{studySeries.map((point) => (
 						<div
 							key={point.id}
@@ -29,7 +35,10 @@ export default function NotebookDashboard() {
 			</section>
 
 			<section className="border border-black/10 bg-[#fbf8f2] p-6">
-				<p className="text-sm text-black/48">Activity</p>
+				<div className="flex items-center justify-between gap-4">
+					<p className="text-sm text-black/48">Activity</p>
+					<p className="text-sm text-black/48">12 weeks</p>
+				</div>
 				<div
 					className="mt-4 grid gap-1"
 					style={{

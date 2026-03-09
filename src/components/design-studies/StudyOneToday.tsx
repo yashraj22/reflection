@@ -1,117 +1,168 @@
-import { GoalStack, PromptStack } from "./shared";
+import { useState } from "react";
+import { studyGoals, studyPrompts } from "./mockData";
 
 export default function StudyOneToday() {
+	const [step, setStep] = useState("Finish one honest page before lunch");
+	const [reflection, setReflection] = useState(
+		"I kept circling the hard part until I named it clearly. Once the next step was concrete, the resistance dropped. The day improved after that.",
+	);
+	const [mood, setMood] = useState(4);
+	const [energy, setEnergy] = useState(3);
+	const [progress, setProgress] = useState(4);
+
+	function insertPrompt(prompt: string) {
+		setReflection((current) =>
+			current.trim() ? `${current.trim()}\n\n${prompt}` : `${prompt}\n\n`,
+		);
+	}
+
 	return (
-		<div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_320px]">
-			<section className="rounded-[18px] border border-black/10 bg-[#fffdf8] p-6 shadow-[0_12px_30px_rgba(34,24,14,0.06)] md:p-8">
-				<div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+		<div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_300px]">
+			<section className="border border-black/10 bg-[#fffdf8] p-6 md:p-7">
+				<div className="flex flex-wrap items-end justify-between gap-4 border-b border-black/10 pb-5">
 					<div>
-						<p className="text-sm text-black/55">Today</p>
+						<p className="text-sm text-black/52">Today</p>
 						<h1
-							className="text-3xl tracking-[-0.04em]"
+							className="mt-2 text-3xl tracking-[-0.04em]"
 							style={{ fontFamily: '"Fraunces", serif' }}
 						>
 							Saturday, March 7
 						</h1>
 					</div>
-					<div className="text-sm text-black/55">Saved 2m ago</div>
+					<p className="text-sm text-black/52">Draft</p>
 				</div>
 
-				<div className="space-y-5">
-					<div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_220px]">
-						<div className="space-y-5">
-							<div className="block space-y-2">
-								<span className="text-sm font-medium text-black/70">Goal</span>
-								<div className="rounded-2xl border border-[#d7ccb9] bg-[#fbf6ee] px-4 py-3 text-[15px]">
+				<div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_240px]">
+					<div className="space-y-6">
+						<div className="grid gap-5 md:grid-cols-2">
+							<div>
+								<p className="text-sm font-medium text-black/68">Goal</p>
+								<p className="mt-2 border-t border-black/10 pt-3 text-[15px]">
 									Write with more clarity
-								</div>
+								</p>
 							</div>
-
-							<label className="block space-y-2">
-								<span className="text-sm font-medium text-black/70">
-									Today's step
+							<label className="block">
+								<span className="text-sm font-medium text-black/68">
+									Next step
 								</span>
 								<input
-									readOnly
-									value="Finish one honest page before lunch"
-									className="w-full rounded-2xl border border-[#cabca6] bg-transparent px-4 py-3 outline-none"
+									value={step}
+									onChange={(event) => setStep(event.target.value)}
+									className="mt-2 w-full border border-[#d3c8b8] bg-[#fffdfa] px-3 py-3 text-[15px] outline-none"
 								/>
 							</label>
 						</div>
 
-						<div className="rounded-[22px] border border-[#d7ccb9] bg-[#fbf6ee] p-5">
-							<p className="text-sm text-black/55">Context</p>
-							<div className="mt-4 space-y-4 text-sm leading-6 text-black/72">
-								<p>Clarity has shown up in 3 of the last 5 entries.</p>
-								<p>
-									Average progress is still below 4, so smaller steps are
-									working better.
-								</p>
-								<p>
-									Most recent win: the day felt lighter after the first honest
-									page.
-								</p>
+						<div>
+							<p className="text-sm font-medium text-black/68">Write</p>
+							<div className="mt-3 border border-[#d3c8b8] bg-[#fffdfa] p-4">
+								<textarea
+									value={reflection}
+									onChange={(event) => setReflection(event.target.value)}
+									className="min-h-[340px] w-full resize-none bg-transparent text-[15px] leading-7 outline-none"
+								/>
 							</div>
 						</div>
-					</div>
 
-					<div className="space-y-2">
-						<span className="text-sm font-medium text-black/70">Write</span>
-						<div className="rounded-[24px] border border-[#cabca6] bg-[#fffdfa] p-5">
-							<textarea
-								readOnly
-								value={
-									"I kept circling the hard part until I named it clearly. Once the next step was concrete, the resistance dropped. The day improved after that."
-								}
-								className="min-h-[360px] w-full resize-none bg-transparent text-[15px] leading-7 outline-none"
+						<div className="grid gap-3 sm:grid-cols-3">
+							<ScaleField label="Mood" value={mood} onChange={setMood} />
+							<ScaleField label="Energy" value={energy} onChange={setEnergy} />
+							<ScaleField
+								label="Progress"
+								value={progress}
+								onChange={setProgress}
 							/>
 						</div>
 					</div>
 
-					<div className="grid gap-3 sm:grid-cols-3">
-						{[
-							["Mood", "4"],
-							["Energy", "3"],
-							["Progress", "4"],
-						].map(([label, value]) => (
-							<div
-								key={label}
-								className="rounded-2xl border border-[#d8cdbb] bg-[#fbf7ef] px-4 py-4"
-							>
-								<p className="text-sm text-black/55">{label}</p>
-								<p className="mt-2 text-2xl font-semibold">{value}/5</p>
+					<aside className="border-l border-black/10 pl-0 lg:pl-6">
+						<div className="space-y-5">
+							<div>
+								<p className="text-sm font-medium text-black/68">Context</p>
+								<div className="mt-3 space-y-3 text-sm leading-6 text-black/68">
+									<p>Clarity has shown up in 3 of the last 5 entries.</p>
+									<p>Smaller steps still correlate with better progress.</p>
+									<p>Most recent win: one honest page changed the tone.</p>
+								</div>
 							</div>
-						))}
-					</div>
+
+							<div className="border-t border-black/10 pt-5">
+								<p className="text-sm font-medium text-black/68">Questions</p>
+								<div className="mt-3 space-y-3">
+									{studyPrompts.map((prompt) => (
+										<button
+											key={prompt}
+											type="button"
+											onClick={() => insertPrompt(prompt)}
+											className="block w-full border-b border-black/10 pb-3 text-left text-sm leading-6 text-black/74"
+										>
+											{prompt}
+										</button>
+									))}
+								</div>
+							</div>
+						</div>
+					</aside>
 				</div>
 			</section>
 
-			<div className="space-y-6">
-				<section className="rounded-[18px] border border-black/10 bg-[#fffdf8] p-6 shadow-[0_12px_30px_rgba(34,24,14,0.06)]">
-					<div className="mb-4 flex items-center justify-between gap-4">
-						<h2
-							className="text-2xl tracking-[-0.04em]"
-							style={{ fontFamily: '"Fraunces", serif' }}
+			<aside className="border border-black/10 bg-[#fbf7ef] p-6">
+				<div className="flex items-center justify-between gap-4 border-b border-black/10 pb-4">
+					<h2
+						className="text-2xl tracking-[-0.04em]"
+						style={{ fontFamily: '"Fraunces", serif' }}
+					>
+						In view
+					</h2>
+					<p className="text-sm text-black/52">3 goals</p>
+				</div>
+				<div className="mt-5 space-y-5">
+					{studyGoals.map((goal) => (
+						<div
+							key={goal.title}
+							className="border-t border-black/10 pt-4 first:border-t-0 first:pt-0"
 						>
-							Prompts
-						</h2>
-						<p className="text-sm text-black/55">4 ready</p>
-					</div>
-					<PromptStack buttonClassName="w-full rounded-2xl border border-[#d8ccb8] bg-[#fbf7ef] px-4 py-3 text-left text-sm leading-6 transition hover:bg-[#f6efdf]" />
-				</section>
+							<p className="text-sm text-black/48">{goal.horizon}</p>
+							<p className="mt-2 text-lg font-semibold">{goal.title}</p>
+							<p className="mt-2 text-sm leading-6 text-black/64">
+								{goal.nextStep}
+							</p>
+						</div>
+					))}
+				</div>
+			</aside>
+		</div>
+	);
+}
 
-				<section className="rounded-[18px] border border-black/10 bg-[#fffdf8] p-6 shadow-[0_12px_30px_rgba(34,24,14,0.06)]">
-					<div className="mb-4 flex items-center justify-between gap-4">
-						<h2
-							className="text-2xl tracking-[-0.04em]"
-							style={{ fontFamily: '"Fraunces", serif' }}
-						>
-							In View
-						</h2>
-						<p className="text-sm text-black/55">3 goals</p>
-					</div>
-					<GoalStack />
-				</section>
+function ScaleField({
+	label,
+	value,
+	onChange,
+}: {
+	label: string;
+	value: number;
+	onChange: (value: number) => void;
+}) {
+	return (
+		<div className="border-t border-black/10 pt-3">
+			<p className="text-sm text-black/52">{label}</p>
+			<div className="mt-3 grid grid-cols-5 gap-1.5">
+				{[1, 2, 3, 4, 5].map((item) => (
+					<button
+						key={item}
+						type="button"
+						onClick={() => onChange(item)}
+						aria-pressed={item === value}
+						className={`h-9 border text-sm ${
+							item === value
+								? "border-[#231c16] bg-[#231c16] text-[#fffdf8]"
+								: "border-black/10 bg-[#fffdfa] text-black/60"
+						}`}
+					>
+						{item}
+					</button>
+				))}
 			</div>
 		</div>
 	);

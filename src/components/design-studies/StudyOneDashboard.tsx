@@ -3,18 +3,18 @@ import { ActivityHeatmap, MultiLineChart } from "./shared";
 export default function StudyOneDashboard() {
 	return (
 		<div className="space-y-6">
-			<section className="rounded-[18px] border border-black/10 bg-[#fffdf8] p-6 shadow-[0_12px_30px_rgba(34,24,14,0.06)] md:p-8">
+			<section className="border border-black/10 bg-[#fffdf8] p-6 md:p-7">
 				<div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-black/10 pb-5">
 					<div>
-						<p className="text-sm text-black/55">Dashboard</p>
+						<p className="text-sm text-black/52">Dashboard</p>
 						<h1
-							className="text-3xl tracking-[-0.04em]"
+							className="mt-2 text-3xl tracking-[-0.04em]"
 							style={{ fontFamily: '"Fraunces", serif' }}
 						>
 							Patterns over time
 						</h1>
 					</div>
-					<p className="text-sm text-black/55">14 day window</p>
+					<p className="text-sm text-black/52">14 day window</p>
 				</div>
 
 				<MultiLineChart
@@ -28,31 +28,31 @@ export default function StudyOneDashboard() {
 				/>
 			</section>
 
-			<div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-				<section className="rounded-[18px] border border-black/10 bg-[#fffdf8] p-6 shadow-[0_12px_30px_rgba(34,24,14,0.06)]">
-					<div className="space-y-6">
+			<div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+				<section className="border border-black/10 bg-[#fbf7ef] p-6">
+					<div className="space-y-5">
 						<div>
-							<p className="text-sm text-black/55">Current streak</p>
-							<p className="mt-2 text-5xl font-semibold tracking-[-0.05em]">
+							<p className="text-sm text-black/52">Current streak</p>
+							<p className="mt-2 text-4xl font-semibold tracking-[-0.04em]">
 								18
 							</p>
 						</div>
-						<div className="border-t border-black/10 pt-6">
-							<p className="text-sm text-black/55">Average energy</p>
-							<p className="mt-2 text-5xl font-semibold tracking-[-0.05em]">
+						<div className="border-t border-black/10 pt-5">
+							<p className="text-sm text-black/52">Average energy</p>
+							<p className="mt-2 text-4xl font-semibold tracking-[-0.04em]">
 								3.4
 							</p>
 						</div>
-						<div className="border-t border-black/10 pt-6">
-							<p className="text-sm text-black/55">Average progress</p>
-							<p className="mt-2 text-5xl font-semibold tracking-[-0.05em]">
+						<div className="border-t border-black/10 pt-5">
+							<p className="text-sm text-black/52">Average progress</p>
+							<p className="mt-2 text-4xl font-semibold tracking-[-0.04em]">
 								3.8
 							</p>
 						</div>
 					</div>
 				</section>
 
-				<section className="rounded-[18px] border border-black/10 bg-[#fffdf8] p-6 shadow-[0_12px_30px_rgba(34,24,14,0.06)]">
+				<section className="border border-black/10 bg-[#fffdf8] p-6">
 					<div className="mb-5 flex items-center justify-between gap-4">
 						<h2
 							className="text-2xl tracking-[-0.04em]"
@@ -60,7 +60,7 @@ export default function StudyOneDashboard() {
 						>
 							Activity
 						</h2>
-						<p className="text-sm text-black/55">12 weeks</p>
+						<p className="text-sm text-black/52">12 weeks</p>
 					</div>
 					<ActivityHeatmap
 						levels={[
@@ -70,7 +70,7 @@ export default function StudyOneDashboard() {
 							"rgba(126, 95, 63, 0.52)",
 							"rgba(126, 95, 63, 0.78)",
 						]}
-						cellRadius={4}
+						cellRadius={3}
 						cellSize={13}
 					/>
 				</section>
