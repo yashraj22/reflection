@@ -19,6 +19,11 @@ import { Route as R5RouteImport } from './routes/5'
 import { Route as R4RouteImport } from './routes/4'
 import { Route as R3RouteImport } from './routes/3'
 import { Route as R2RouteImport } from './routes/2'
+import { Route as R15RouteImport } from './routes/15'
+import { Route as R14RouteImport } from './routes/14'
+import { Route as R13RouteImport } from './routes/13'
+import { Route as R12RouteImport } from './routes/12'
+import { Route as R11RouteImport } from './routes/11'
 import { Route as R10RouteImport } from './routes/10'
 import { Route as R1RouteImport } from './routes/1'
 import { Route as IndexRouteImport } from './routes/index'
@@ -111,6 +116,31 @@ const R3Route = R3RouteImport.update({
 const R2Route = R2RouteImport.update({
   id: '/2',
   path: '/2',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R15Route = R15RouteImport.update({
+  id: '/15',
+  path: '/15',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R14Route = R14RouteImport.update({
+  id: '/14',
+  path: '/14',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R13Route = R13RouteImport.update({
+  id: '/13',
+  path: '/13',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R12Route = R12RouteImport.update({
+  id: '/12',
+  path: '/12',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R11Route = R11RouteImport.update({
+  id: '/11',
+  path: '/11',
   getParentRoute: () => rootRouteImport,
 } as any)
 const R10Route = R10RouteImport.update({
@@ -333,6 +363,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/1': typeof R1RouteWithChildren
   '/10': typeof R10RouteWithChildren
+  '/11': typeof R11Route
+  '/12': typeof R12Route
+  '/13': typeof R13Route
+  '/14': typeof R14Route
+  '/15': typeof R15Route
   '/2': typeof R2RouteWithChildren
   '/3': typeof R3RouteWithChildren
   '/4': typeof R4RouteWithChildren
@@ -386,6 +421,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/11': typeof R11Route
+  '/12': typeof R12Route
+  '/13': typeof R13Route
+  '/14': typeof R14Route
+  '/15': typeof R15Route
   '/about': typeof AboutRoute
   '/history': typeof HistoryRoute
   '/1/dashboard': typeof R1DashboardRoute
@@ -434,6 +474,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/1': typeof R1RouteWithChildren
   '/10': typeof R10RouteWithChildren
+  '/11': typeof R11Route
+  '/12': typeof R12Route
+  '/13': typeof R13Route
+  '/14': typeof R14Route
+  '/15': typeof R15Route
   '/2': typeof R2RouteWithChildren
   '/3': typeof R3RouteWithChildren
   '/4': typeof R4RouteWithChildren
@@ -491,6 +536,11 @@ export interface FileRouteTypes {
     | '/'
     | '/1'
     | '/10'
+    | '/11'
+    | '/12'
+    | '/13'
+    | '/14'
+    | '/15'
     | '/2'
     | '/3'
     | '/4'
@@ -544,6 +594,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/11'
+    | '/12'
+    | '/13'
+    | '/14'
+    | '/15'
     | '/about'
     | '/history'
     | '/1/dashboard'
@@ -591,6 +646,11 @@ export interface FileRouteTypes {
     | '/'
     | '/1'
     | '/10'
+    | '/11'
+    | '/12'
+    | '/13'
+    | '/14'
+    | '/15'
     | '/2'
     | '/3'
     | '/4'
@@ -647,6 +707,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   R1Route: typeof R1RouteWithChildren
   R10Route: typeof R10RouteWithChildren
+  R11Route: typeof R11Route
+  R12Route: typeof R12Route
+  R13Route: typeof R13Route
+  R14Route: typeof R14Route
+  R15Route: typeof R15Route
   R2Route: typeof R2RouteWithChildren
   R3Route: typeof R3RouteWithChildren
   R4Route: typeof R4RouteWithChildren
@@ -729,6 +794,41 @@ declare module '@tanstack/react-router' {
       path: '/2'
       fullPath: '/2'
       preLoaderRoute: typeof R2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/15': {
+      id: '/15'
+      path: '/15'
+      fullPath: '/15'
+      preLoaderRoute: typeof R15RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/14': {
+      id: '/14'
+      path: '/14'
+      fullPath: '/14'
+      preLoaderRoute: typeof R14RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/13': {
+      id: '/13'
+      path: '/13'
+      fullPath: '/13'
+      preLoaderRoute: typeof R13RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/12': {
+      id: '/12'
+      path: '/12'
+      fullPath: '/12'
+      preLoaderRoute: typeof R12RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/11': {
+      id: '/11'
+      path: '/11'
+      fullPath: '/11'
+      preLoaderRoute: typeof R11RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/10': {
@@ -1199,6 +1299,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R1Route: R1RouteWithChildren,
   R10Route: R10RouteWithChildren,
+  R11Route: R11Route,
+  R12Route: R12Route,
+  R13Route: R13Route,
+  R14Route: R14Route,
+  R15Route: R15Route,
   R2Route: R2RouteWithChildren,
   R3Route: R3RouteWithChildren,
   R4Route: R4RouteWithChildren,

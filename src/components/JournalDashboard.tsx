@@ -1,8 +1,10 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { api } from "../../convex/_generated/api";
-import { formatDisplayDate, getTodayDateKey } from "../lib/date";
+import type { Id } from "../../convex/_generated/dataModel";
+import { formatDisplayDate, getTodayDateKey, resolveDateKey } from "../lib/date";
 
 type GoalDraft = {
 	title: string;
@@ -58,14 +60,21 @@ const EMPTY_REFLECTION: ReflectionDraft = {
 
 const AUTO_SAVE_DELAY_MS = 700;
 
-export default function JournalDashboard() {
+export default function JournalDashboard({
+	dateKey,
+}: {
+	dateKey?: string;
+}) {
 	const todayKey = getTodayDateKey();
+	const selectedDateKey = resolveDateKey(dateKey);
+	const isTodayView = selectedDateKey === todayKey;
 	const dashboardQuery = useQuery({
-		...convexQuery(api.journal.dashboard, { dateKey: todayKey }),
+		...convexQuery(api.journal.dashboard, { dateKey: selectedDateKey }),
 	});
 	const todayReflection = dashboardQuery.data?.todayReflection ?? null;
 	const saveReflection = useConvexMutation(api.journal.upsertReflection);
 	const createGoal = useConvexMutation(api.journal.createGoal);
+	const updateGoal = useConvexMutation(api.journal.updateGoal);
 	const setGoalStatus = useConvexMutation(api.journal.setGoalStatus);
 
 	const saveRequestRef = useRef(0);
@@ -82,6 +91,7 @@ export default function JournalDashboard() {
 	const [goalErrorMessage, setGoalErrorMessage] = useState<string | null>(null);
 	const [goalTitleError, setGoalTitleError] = useState<string | null>(null);
 	const [isGoalEditorOpen, setGoalEditorOpen] = useState(false);
+	const [editingGoalId, setEditingGoalId] = useState<Id<"goals"> | null>(null);
 	const [isAutoSavingReflection, setAutoSavingReflection] = useState(false);
 	const [goalActionId, setGoalActionId] = useState<string | null>(null);
 	const [isSavingGoal, startSavingGoal] = useTransition();
@@ -91,8 +101,8 @@ export default function JournalDashboard() {
 		setReflectionDraft(nextDraft);
 		setSavedReflectionDraft(nextDraft);
 		setReflectionErrorMessage(null);
-		setStatusMessage(`Loaded ${formatDisplayDate(todayKey)}.`);
-	}, [todayReflection, todayKey]);
+		setStatusMessage(`Loaded ${formatDisplayDate(selectedDateKey)}.`);
+	}, [selectedDateKey, todayReflection]);
 
 	const hasGoalDraft = hasGoalInput(goalDraft);
 	const hasUnsavedReflection = !reflectionDraftsEqual(
@@ -131,7 +141,7 @@ export default function JournalDashboard() {
 			setReflectionErrorMessage(null);
 
 			void saveReflection({
-				dateKey: todayKey,
+				dateKey: selectedDateKey,
 				summary: optionalText(draft.summary),
 				intention: optionalText(draft.intention),
 				reflection: optionalText(draft.reflection),
@@ -147,7 +157,7 @@ export default function JournalDashboard() {
 						return;
 					}
 					setSavedReflectionDraft(draft);
-					setStatusMessage(`Saved ${formatDisplayDate(todayKey)}.`);
+					setStatusMessage(`Saved ${formatDisplayDate(selectedDateKey)}.`);
 				})
 				.catch((error) => {
 					if (saveRequestRef.current !== requestId) {
@@ -168,7 +178,7 @@ export default function JournalDashboard() {
 		}, AUTO_SAVE_DELAY_MS);
 
 		return () => window.clearTimeout(timeoutId);
-	}, [hasUnsavedReflection, reflectionDraft, saveReflection, todayKey]);
+	}, [hasUnsavedReflection, reflectionDraft, saveReflection, selectedDateKey]);
 
 	if (dashboardQuery.isPending) {
 		return (
@@ -201,12 +211,23 @@ export default function JournalDashboard() {
 
 	const dashboard = dashboardQuery.data;
 	const primaryGoal = dashboard.activeGoals[0] ?? null;
-	const additionalGoals = dashboard.activeGoals.slice(1);
-	const contextLines = dashboard.contextLines.slice(0, 2);
-	const primaryPrompt = dashboard.promptPack.questions[0] ?? null;
-	const morePrompts = dashboard.promptPack.questions.slice(1);
+	const visibleDirectionGoals = dashboard.activeGoals.slice(0, 3);
+	const remainingDirectionGoals =
+		dashboard.activeGoals.length > 3 ? dashboard.activeGoals.length - 3 : 0;
+	const contextLines = dashboard.contextLines.slice(0, 3);
+	const metrics = dashboard.metrics;
+	const promptHeadline = dashboard.promptPack.headline;
+	const visiblePrompts = dashboard.promptPack.questions.slice(0, 2);
+	const morePrompts = dashboard.promptPack.questions.slice(2);
 	const showGoalEditor = isGoalEditorOpen || dashboard.activeGoals.length === 0;
 	const visibleStatus = reflectionErrorMessage ?? statusMessage;
+	const heroSubtitle = !isTodayView
+		? "Review this entry, or update it if the record should change."
+		: primaryGoal?.why?.trim() ||
+			primaryGoal?.title ||
+			"Direction, writing, and review in one place.";
+	const pulseSummary = describePulse(reflectionDraft);
+	const patternSummary = describePattern(metrics.averageProgress, metrics.streak);
 
 	async function handleGoalSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -219,24 +240,52 @@ export default function JournalDashboard() {
 		setGoalTitleError(null);
 		setGoalErrorMessage(null);
 
+		const payload = {
+			title: goalDraft.title.trim(),
+			why: optionalText(goalDraft.why),
+			area: optionalText(goalDraft.area),
+			nextStep: optionalText(goalDraft.nextStep),
+			horizon: goalDraft.horizon,
+		};
+
 		startSavingGoal(async () => {
 			try {
-				await createGoal({
-					title: goalDraft.title.trim(),
-					why: optionalText(goalDraft.why),
-					area: optionalText(goalDraft.area),
-					nextStep: optionalText(goalDraft.nextStep),
-					horizon: goalDraft.horizon,
-				});
+				if (editingGoalId) {
+					await updateGoal({
+						goalId: editingGoalId,
+						...payload,
+					});
+					setStatusMessage("Goal updated.");
+				} else {
+					await createGoal(payload);
+					setStatusMessage("Goal added.");
+				}
 				setGoalDraft(EMPTY_GOAL);
+				setEditingGoalId(null);
 				setGoalEditorOpen(false);
-				setStatusMessage("Goal added.");
 			} catch (error) {
 				setGoalErrorMessage(
-					error instanceof Error ? error.message : "Goal creation failed.",
+					error instanceof Error ? error.message : "Goal save failed.",
 				);
 			}
 		});
+	}
+
+	function handleEditGoal(
+		goal: (typeof dashboard.activeGoals)[number],
+	) {
+		setGoalEditorOpen(true);
+		setGoalTitleError(null);
+		setGoalErrorMessage(null);
+		setEditingGoalId(goal._id as Id<"goals">);
+		setGoalDraft({
+			title: goal.title,
+			why: goal.why ?? "",
+			area: goal.area ?? "",
+			nextStep: goal.nextStep ?? "",
+			horizon: goal.horizon,
+		});
+		goalTitleRef.current?.focus();
 	}
 
 	async function handleGoalStatusChange(
@@ -280,78 +329,509 @@ export default function JournalDashboard() {
 
 	return (
 		<main id="content" className="site-main">
-			<div className="page-wrap">
-				<header className="page-header">
-					<div>
-						<h1 className="page-title">{formatDisplayDate(todayKey)}</h1>
-						{primaryGoal ? (
-							<p className="page-subtitle">{primaryGoal.title}</p>
+			<div className="dashboard-wrap">
+				<header className="dashboard-header-compact">
+					<div className="dashboard-header-copy">
+						<p className="hero-eyebrow">Northstar journal</p>
+						<h1 className="page-title page-title-dashboard">
+							{formatDisplayDate(selectedDateKey)}
+						</h1>
+						<p className="page-subtitle page-subtitle-dashboard">
+							{heroSubtitle}
+						</p>
+						<div className="dashboard-header-stats">
+							<span className="dashboard-header-stat">
+								{metrics.streak} day{metrics.streak === 1 ? "" : "s"} streak
+							</span>
+							<span className="dashboard-header-stat">
+								Progress {metricValue(metrics.averageProgress)}
+							</span>
+							{primaryGoal ? (
+								<span className="dashboard-header-stat">
+									Current focus {primaryGoal.title}
+								</span>
+							) : null}
+						</div>
+					</div>
+					<div className="dashboard-header-meta">
+						<p className="status-text" aria-live="polite">
+							{isAutoSavingReflection ? "Saving..." : visibleStatus}
+						</p>
+						{!isTodayView ? (
+							<Link
+								to="/"
+								search={{ date: undefined }}
+								className="button-secondary text-sm"
+							>
+								Back to today
+							</Link>
 						) : null}
 					</div>
-					<p className="status-text" aria-live="polite">
-						{isAutoSavingReflection ? "Saving..." : visibleStatus}
-					</p>
 				</header>
 
-				{contextLines.length > 0 ? (
-					<section className="section-shell section-shell-muted">
-						<div className="context-list">
-							{contextLines.map((line) => (
-								<p key={line} className="context-line">
-									{line}
+				<div className="dashboard-grid">
+					<div className="dashboard-main">
+						<section className="section-shell section-shell-reflection">
+							<div className="section-head">
+								<div>
+									<p className="section-kicker">Write</p>
+									<h2 className="section-title">Reflection</h2>
+								</div>
+								<p className="section-note section-note-inline">
+									Start with the next step, then write the honest version.
 								</p>
-							))}
+							</div>
+
+							<div className="field-grid">
+								<InputField
+									label="Today's Step"
+									name="intention"
+									value={reflectionDraft.intention}
+									onChange={(value) =>
+										setReflectionDraft((current) => ({
+											...current,
+											intention: value,
+										}))
+									}
+									placeholder={
+										primaryGoal?.nextStep ?? "The smallest step that matters..."
+									}
+								/>
+
+								<div className="prompt-inline-shell">
+									<div>
+										<p className="section-kicker">Prompt</p>
+										<p className="section-note">{promptHeadline}</p>
+									</div>
+									<div className="prompt-inline-grid">
+										{visiblePrompts.map((prompt) => (
+											<button
+												type="button"
+												key={prompt}
+												onClick={() => insertPrompt(prompt)}
+												className="prompt-button"
+											>
+												{prompt}
+											</button>
+										))}
+									</div>
+								</div>
+
+								<TextAreaField
+									label="Write"
+									name="reflection"
+									value={reflectionDraft.reflection}
+									onChange={(value) =>
+										setReflectionDraft((current) => ({
+											...current,
+											reflection: value,
+										}))
+									}
+									placeholder="What felt true today?..."
+									rows={10}
+									variant="entry"
+								/>
+
+								<details className="details-shell">
+									<summary className="details-summary">
+										Wins, blockers, and tomorrow
+									</summary>
+									<div className="details-panel stack">
+										<div className="field-grid-2">
+											<TextAreaField
+												label="What Happened"
+												name="summary"
+												value={reflectionDraft.summary}
+												onChange={(value) =>
+													setReflectionDraft((current) => ({
+														...current,
+														summary: value,
+													}))
+												}
+												placeholder="The shape of the day..."
+												rows={4}
+											/>
+											<TextAreaField
+												label="Tomorrow"
+												name="tomorrow_focus"
+												value={reflectionDraft.tomorrowFocus}
+												onChange={(value) =>
+													setReflectionDraft((current) => ({
+														...current,
+														tomorrowFocus: value,
+													}))
+												}
+												placeholder="How tomorrow should start..."
+												rows={4}
+											/>
+										</div>
+
+										<div className="field-grid-2">
+											<TextAreaField
+												label="Win"
+												name="win"
+												value={reflectionDraft.win}
+												onChange={(value) =>
+													setReflectionDraft((current) => ({
+														...current,
+														win: value,
+													}))
+												}
+												placeholder="What counted as a win..."
+												rows={3}
+											/>
+											<TextAreaField
+												label="Blocker"
+												name="blocker"
+												value={reflectionDraft.blocker}
+												onChange={(value) =>
+													setReflectionDraft((current) => ({
+														...current,
+														blocker: value,
+													}))
+												}
+												placeholder="What got in the way..."
+												rows={3}
+											/>
+										</div>
+
+										{morePrompts.length > 0 ? (
+											<div className="compact-stack">
+												{morePrompts.map((prompt) => (
+													<button
+														key={prompt}
+														type="button"
+														onClick={() => insertPrompt(prompt)}
+														className="prompt-button"
+													>
+														{prompt}
+													</button>
+												))}
+											</div>
+										) : null}
+									</div>
+								</details>
+
+								{reflectionErrorMessage ? (
+									<p className="message message-error" aria-live="polite">
+										{reflectionErrorMessage}
+									</p>
+								) : null}
+							</div>
+						</section>
+
+						<section className="section-shell section-shell-compact section-shell-muted pattern-strip">
+							<div className="section-head pattern-strip-head">
+								<div>
+									<p className="section-kicker">Momentum</p>
+									<h2 className="section-title">Recent Pattern</h2>
+								</div>
+								<p className="section-note section-note-inline">
+									{patternSummary}
+								</p>
+							</div>
+							<div className="pattern-strip-grid">
+								<InlineMetric
+									label="Streak"
+									value={`${metrics.streak} day${metrics.streak === 1 ? "" : "s"}`}
+								/>
+								<InlineMetric
+									label="Mood"
+									value={metricValue(metrics.averageMood)}
+								/>
+								<InlineMetric
+									label="Energy"
+									value={metricValue(metrics.averageEnergy)}
+								/>
+								<InlineMetric
+									label="Progress"
+									value={metricValue(metrics.averageProgress)}
+								/>
+							</div>
+						</section>
+
+						<div className="dashboard-support-grid">
+							<section className="section-shell section-shell-compact direction-card">
+								<div className="section-head">
+									<div>
+										<p className="section-kicker">Direction</p>
+										<h2 className="section-title">Direction</h2>
+									</div>
+									<button
+										type="button"
+										onClick={() => setGoalEditorOpen((open) => !open)}
+										className="button-quiet text-sm"
+									>
+										{showGoalEditor
+											? "Close"
+											: primaryGoal
+												? "Edit Goals"
+												: "Add Goal"}
+									</button>
+								</div>
+
+								{dashboard.activeGoals.length > 0 ? (
+									<div className="goal-preview-list">
+										{visibleDirectionGoals.map((goal) => (
+											<div key={goal._id} className="goal-preview">
+												<p className="goal-preview-kicker">{goal.horizonLabel}</p>
+												<p className="item-title">{goal.title}</p>
+												<p className="item-meta">
+													{goal.area ? goal.area : "Current focus"}
+												</p>
+												{goal.nextStep ? (
+													<p className="item-copy">Next: {goal.nextStep}</p>
+												) : null}
+											</div>
+										))}
+										{remainingDirectionGoals > 0 ? (
+											<p className="item-meta">
+												{remainingDirectionGoals} more active
+											</p>
+										) : null}
+									</div>
+								) : (
+									<p className="section-note">
+										Set one direction worth pointing today toward.
+									</p>
+								)}
+							</section>
+
+							<section className="section-shell section-shell-compact support-card direction-card">
+								<div className="section-head">
+									<div>
+										<p className="section-kicker">Signal</p>
+										<h2 className="section-title">What The Week Is Saying</h2>
+									</div>
+								</div>
+								{contextLines.length > 0 ? (
+									<div className="context-list">
+										{contextLines.map((line) => (
+											<p key={line} className="context-line">
+												{line}
+											</p>
+										))}
+									</div>
+								) : (
+									<p className="section-note">
+										Write a few days in a row and patterns will start surfacing
+										here.
+									</p>
+								)}
+							</section>
 						</div>
-					</section>
-				) : null}
 
-				<section className="section-shell">
-					<div className="stack">
-						<div className="section-head">
-							<h2 className="section-title">Reflection</h2>
-						</div>
+						{showGoalEditor ? (
+							<section className="section-shell">
+								<div className="section-head">
+									<div>
+										<p className="section-kicker">Direction</p>
+										<h2 className="section-title">
+											{editingGoalId ? "Edit Goal" : "Add Goal"}
+										</h2>
+									</div>
+									<button
+										type="button"
+										onClick={() => setGoalEditorOpen(false)}
+										className="button-quiet text-sm"
+									>
+										Close
+									</button>
+								</div>
 
-						<div className="field-grid">
-							<InputField
-								label="Today's Step"
-								name="intention"
-								value={reflectionDraft.intention}
-								onChange={(value) =>
-									setReflectionDraft((current) => ({
-										...current,
-										intention: value,
-									}))
-								}
-								placeholder={
-									primaryGoal?.nextStep ?? "The smallest step that matters..."
-								}
-							/>
+								<div className="stack">
+									<form className="field-grid" onSubmit={handleGoalSubmit}>
+										<div className="field-grid-2">
+											<InputField
+												inputRef={goalTitleRef}
+												label="Goal"
+												name="goal_title"
+												value={goalDraft.title}
+												onChange={(value) => {
+													setGoalTitleError(null);
+													setGoalDraft((current) => ({
+														...current,
+														title: value,
+													}));
+												}}
+												placeholder="What are you aiming at?..."
+												error={goalTitleError}
+											/>
+											<InputField
+												label="Next Step"
+												name="goal_next_step"
+												value={goalDraft.nextStep}
+												onChange={(value) =>
+													setGoalDraft((current) => ({
+														...current,
+														nextStep: value,
+													}))
+												}
+												placeholder="The next concrete step..."
+											/>
+										</div>
 
-							{primaryPrompt ? (
-								<button
-									type="button"
-									onClick={() => insertPrompt(primaryPrompt)}
-									className="prompt-button"
-								>
-									{primaryPrompt}
-								</button>
-							) : null}
+										<details className="details-shell">
+											<summary className="details-summary">
+												Area, horizon, and why
+											</summary>
+											<div className="details-panel field-grid">
+												<div className="field-grid-2">
+													<InputField
+														label="Area"
+														name="goal_area"
+														value={goalDraft.area}
+														onChange={(value) =>
+															setGoalDraft((current) => ({
+																...current,
+																area: value,
+															}))
+														}
+														placeholder="Work, health, personal..."
+													/>
+													<SelectField
+														label="Horizon"
+														name="goal_horizon"
+														value={goalDraft.horizon}
+														onChange={(value) =>
+															setGoalDraft((current) => ({
+																...current,
+																horizon: value as GoalDraft["horizon"],
+															}))
+														}
+														options={[
+															["north_star", "North Star"],
+															["quarter", "This Quarter"],
+															["current", "Current Focus"],
+														]}
+													/>
+												</div>
 
-							<TextAreaField
-								label="Write"
-								name="reflection"
-								value={reflectionDraft.reflection}
-								onChange={(value) =>
-									setReflectionDraft((current) => ({
-										...current,
-										reflection: value,
-									}))
-								}
-								placeholder="What felt true today?..."
-								rows={10}
-								variant="entry"
-							/>
+												<TextAreaField
+													label="Why"
+													name="goal_why"
+													value={goalDraft.why}
+													onChange={(value) =>
+														setGoalDraft((current) => ({
+															...current,
+															why: value,
+														}))
+													}
+													placeholder="Why this matters..."
+													rows={4}
+												/>
+											</div>
+										</details>
 
+										{goalErrorMessage ? (
+											<p className="message message-error" aria-live="polite">
+												{goalErrorMessage}
+											</p>
+										) : null}
+
+										<div className="flex flex-row-reverse pr-2 justify-content-end min-w-full">
+											<button
+												type="submit"
+												className="button"
+												disabled={isSavingGoal}
+											>
+												{isSavingGoal
+													? "Saving..."
+													: editingGoalId
+														? "Save Changes"
+														: "Add Goal"}
+											</button>
+											{editingGoalId ? (
+												<button
+													type="button"
+													className="button-quiet ml-3 text-sm"
+													onClick={() => {
+														setGoalDraft(EMPTY_GOAL);
+														setEditingGoalId(null);
+													}}
+												>
+													Cancel Editing
+												</button>
+											) : null}
+										</div>
+									</form>
+
+									<div className="mt-5">
+                                        <h2 className="section-title">
+											 Current Goals
+										</h2>
+										<div className="mt-5">
+                                        {dashboard.activeGoals.length > 0 ? (
+										<ul className="list-reset rule-list">
+											{dashboard.activeGoals.map((goal) => (
+												<li key={goal._id} className="simple-row">
+													<div className="section-head">
+														<div className="min-w-0">
+															<p className="item-title">{goal.title}</p>
+															<p className="item-meta">
+																{goal.horizonLabel}
+																{goal.area ? ` / ${goal.area}` : ""}
+															</p>
+														</div>
+														<div className="flex flex-wrap gap-2">
+															<button
+																type="button"
+																className="button-secondary"
+																onClick={() => handleEditGoal(goal)}
+																disabled={goalActionId === goal._id}
+															>
+																Edit
+															</button>
+															<button
+																type="button"
+																className="button-secondary"
+																onClick={() =>
+																	void handleGoalStatusChange(goal._id, "paused")
+																}
+																disabled={goalActionId === goal._id}
+															>
+																Pause Goal
+															</button>
+															<button
+																type="button"
+																className="button-secondary"
+																onClick={() =>
+																	void handleGoalStatusChange(goal._id, "completed")
+																}
+																disabled={goalActionId === goal._id}
+															>
+																Complete Goal
+															</button>
+														</div>
+													</div>
+													{goal.nextStep ? (
+														<p className="item-copy">Next: {goal.nextStep}</p>
+													) : null}
+													{goal.why ? (
+														<p className="item-copy">{goal.why}</p>
+													) : null}
+												</li>
+											))}
+										</ul>
+									) : null}
+										</div>
+									</div>
+								</div>
+							</section>
+						) : null}
+					</div>
+
+					<aside className="dashboard-sidebar">
+						<section className="section-shell section-shell-compact sidebar-card sidebar-card-pulse">
+							<div className="section-head">
+								<div>
+									<p className="section-kicker">Pulse</p>
+									<h2 className="section-title">
+										{isTodayView ? "Today's Meters" : "Entry Meters"}
+									</h2>
+								</div>
+							</div>
+							<p className="section-note">{pulseSummary}</p>
 							<div className="meter-grid">
 								<ScaleField
 									label="Mood"
@@ -387,284 +867,48 @@ export default function JournalDashboard() {
 									}
 								/>
 							</div>
+						</section>
 
-							<details className="details-shell">
-								<summary className="details-summary">More</summary>
-								<div className="details-panel stack">
-									{morePrompts.length > 0 ? (
-										<div className="compact-stack">
-											{morePrompts.map((prompt) => (
-												<button
-													key={prompt}
-													type="button"
-													onClick={() => insertPrompt(prompt)}
-													className="prompt-button"
-												>
-													{prompt}
-												</button>
-											))}
-										</div>
-									) : null}
-
-									<div className="field-grid-2">
-										<TextAreaField
-											label="What Happened"
-											name="summary"
-											value={reflectionDraft.summary}
-											onChange={(value) =>
-												setReflectionDraft((current) => ({
-													...current,
-													summary: value,
-												}))
-											}
-											placeholder="The shape of the day..."
-											rows={4}
-										/>
-										<TextAreaField
-											label="Tomorrow"
-											name="tomorrow_focus"
-											value={reflectionDraft.tomorrowFocus}
-											onChange={(value) =>
-												setReflectionDraft((current) => ({
-													...current,
-													tomorrowFocus: value,
-												}))
-											}
-											placeholder="How tomorrow should start..."
-											rows={4}
-										/>
-									</div>
-
-									<div className="field-grid-2">
-										<TextAreaField
-											label="Win"
-											name="win"
-											value={reflectionDraft.win}
-											onChange={(value) =>
-												setReflectionDraft((current) => ({
-													...current,
-													win: value,
-												}))
-											}
-											placeholder="What counted as a win..."
-											rows={3}
-										/>
-										<TextAreaField
-											label="Blocker"
-											name="blocker"
-											value={reflectionDraft.blocker}
-											onChange={(value) =>
-												setReflectionDraft((current) => ({
-													...current,
-													blocker: value,
-												}))
-											}
-											placeholder="What got in the way..."
-											rows={3}
-										/>
-									</div>
+						<section className="section-shell section-shell-compact sidebar-card">
+							<div className="section-head">
+								<div>
+									<p className="section-kicker">Support</p>
+									<h2 className="section-title">If You Are Stuck</h2>
 								</div>
-							</details>
-
-							{reflectionErrorMessage ? (
-								<p className="message message-error" aria-live="polite">
-									{reflectionErrorMessage}
-								</p>
-							) : null}
-						</div>
-					</div>
-				</section>
-
-				<section className="section-shell">
-					<div className="section-head">
-						<h2 className="section-title">Direction</h2>
-						<button
-							type="button"
-							onClick={() => setGoalEditorOpen((open) => !open)}
-							className="button-quiet text-sm"
-						>
-							{showGoalEditor
-								? "Close"
-								: primaryGoal
-									? "Edit Goals"
-									: "Add Goal"}
-						</button>
-					</div>
-
-					{primaryGoal ? (
-						<div className="goal-preview">
-							<p className="item-title">{primaryGoal.title}</p>
-							<p className="item-meta">
-								{primaryGoal.horizonLabel}
-								{primaryGoal.area ? ` / ${primaryGoal.area}` : ""}
-							</p>
-							<p className="item-copy">
-								{primaryGoal.nextStep
-									? `Next: ${primaryGoal.nextStep}`
-									: "This goal still needs a concrete next step."}
-							</p>
-							{additionalGoals.length > 0 ? (
-								<p className="item-meta">
-									{additionalGoals.length} more active
-								</p>
-							) : null}
-						</div>
-					) : (
-						<p className="section-note">
-							Set one direction worth pointing today toward.
-						</p>
-					)}
-
-					{showGoalEditor ? (
-						<div className="stack">
-							<form className="field-grid" onSubmit={handleGoalSubmit}>
-								<div className="field-grid-2">
-									<InputField
-										inputRef={goalTitleRef}
-										label="Goal"
-										name="goal_title"
-										value={goalDraft.title}
-										onChange={(value) => {
-											setGoalTitleError(null);
-											setGoalDraft((current) => ({
-												...current,
-												title: value,
-											}));
-										}}
-										placeholder="What are you aiming at?..."
-										error={goalTitleError}
-									/>
-									<InputField
-										label="Next Step"
-										name="goal_next_step"
-										value={goalDraft.nextStep}
-										onChange={(value) =>
-											setGoalDraft((current) => ({
-												...current,
-												nextStep: value,
-											}))
-										}
-										placeholder="The next concrete step..."
-									/>
-								</div>
-
+							</div>
+							<p className="section-note">{promptHeadline}</p>
+							<div className="compact-stack">
+								{visiblePrompts.map((prompt) => (
+									<button
+										type="button"
+										key={prompt}
+										onClick={() => insertPrompt(prompt)}
+										className="prompt-button"
+									>
+										{prompt}
+									</button>
+								))}
+							</div>
+							{morePrompts.length > 0 ? (
 								<details className="details-shell">
-									<summary className="details-summary">
-										More Goal Fields
-									</summary>
-									<div className="details-panel field-grid">
-										<div className="field-grid-2">
-											<InputField
-												label="Area"
-												name="goal_area"
-												value={goalDraft.area}
-												onChange={(value) =>
-													setGoalDraft((current) => ({
-														...current,
-														area: value,
-													}))
-												}
-												placeholder="Work, health, personal..."
-											/>
-											<SelectField
-												label="Horizon"
-												name="goal_horizon"
-												value={goalDraft.horizon}
-												onChange={(value) =>
-													setGoalDraft((current) => ({
-														...current,
-														horizon: value as GoalDraft["horizon"],
-													}))
-												}
-												options={[
-													["north_star", "North Star"],
-													["quarter", "This Quarter"],
-													["current", "Current Focus"],
-												]}
-											/>
-										</div>
-
-										<TextAreaField
-											label="Why"
-											name="goal_why"
-											value={goalDraft.why}
-											onChange={(value) =>
-												setGoalDraft((current) => ({
-													...current,
-													why: value,
-												}))
-											}
-											placeholder="Why this matters..."
-											rows={4}
-										/>
+									<summary className="details-summary">More questions</summary>
+									<div className="details-panel compact-stack">
+										{morePrompts.map((prompt) => (
+											<button
+												key={prompt}
+												type="button"
+												onClick={() => insertPrompt(prompt)}
+												className="prompt-button"
+											>
+												{prompt}
+											</button>
+										))}
 									</div>
 								</details>
-
-								{goalErrorMessage ? (
-									<p className="message message-error" aria-live="polite">
-										{goalErrorMessage}
-									</p>
-								) : null}
-
-								<div>
-									<button
-										type="submit"
-										className="button"
-										disabled={isSavingGoal}
-									>
-										{isSavingGoal ? "Saving..." : "Add Goal"}
-									</button>
-								</div>
-							</form>
-
-							{dashboard.activeGoals.length > 0 ? (
-								<ul className="list-reset rule-list">
-									{dashboard.activeGoals.map((goal) => (
-										<li key={goal._id} className="simple-row">
-											<div className="section-head">
-												<div className="min-w-0">
-													<p className="item-title">{goal.title}</p>
-													<p className="item-meta">
-														{goal.horizonLabel}
-														{goal.area ? ` / ${goal.area}` : ""}
-													</p>
-												</div>
-												<div className="flex flex-wrap gap-2">
-													<button
-														type="button"
-														className="button-secondary"
-														onClick={() =>
-															void handleGoalStatusChange(goal._id, "paused")
-														}
-														disabled={goalActionId === goal._id}
-													>
-														Pause Goal
-													</button>
-													<button
-														type="button"
-														className="button-secondary"
-														onClick={() =>
-															void handleGoalStatusChange(goal._id, "completed")
-														}
-														disabled={goalActionId === goal._id}
-													>
-														Complete Goal
-													</button>
-												</div>
-											</div>
-											{goal.nextStep ? (
-												<p className="item-copy">Next: {goal.nextStep}</p>
-											) : null}
-											{goal.why ? (
-												<p className="item-copy">{goal.why}</p>
-											) : null}
-										</li>
-									))}
-								</ul>
 							) : null}
-						</div>
-					) : null}
-				</section>
+						</section>
+					</aside>
+				</div>
 			</div>
 		</main>
 	);
@@ -712,6 +956,63 @@ function optionalText(value: string) {
 	return trimmed ? trimmed : undefined;
 }
 
+function describePulse(reflection: ReflectionDraft) {
+	const moodText =
+		reflection.mood >= 4
+			? "steady"
+			: reflection.mood <= 2
+				? "heavy"
+				: "mixed";
+	const energyText =
+		reflection.energy >= 4
+			? "strong energy"
+			: reflection.energy <= 2
+				? "low energy"
+				: "moderate energy";
+	const progressText =
+		reflection.progress >= 4
+			? "Momentum is real today."
+			: reflection.progress <= 2
+				? "Keep the next step small and concrete."
+				: "There is movement, but it needs a cleaner next step.";
+
+	return `Mood feels ${moodText}, ${energyText}, and ${progressText}`;
+}
+
+function describePattern(
+	progress: number | null,
+	streak: number,
+) {
+	if (progress !== null && progress >= 4) {
+		return `The recent streak is turning into real momentum across ${streak} days.`;
+	}
+
+	if (progress !== null && progress <= 2) {
+		return "Progress has been harder to lock in, so the page should bias toward one clear next step.";
+	}
+
+	return "Recent check-ins show movement, but clarity matters more than adding more volume.";
+}
+
+function InlineMetric({
+	label,
+	value,
+}: {
+	label: string;
+	value: string;
+}) {
+	return (
+		<div className="pattern-metric">
+			<span className="metric-label">{label}</span>
+			<span className="pattern-metric-value">{value}</span>
+		</div>
+	);
+}
+
+function metricValue(value: number | null) {
+	return value === null ? "n/a" : `${value}/5`;
+}
+
 function ScaleField({
 	label,
 	name,
@@ -724,7 +1025,7 @@ function ScaleField({
 	onChange: (value: number) => void;
 }) {
 	return (
-		<fieldset className="scale-group">
+		<fieldset className={`scale-group scale-group-${name}`}>
 			<legend className="field-label">{label}</legend>
 			<div className="scale-row">
 				{[1, 2, 3, 4, 5].map((step) => (

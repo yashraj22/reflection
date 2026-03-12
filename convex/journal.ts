@@ -204,6 +204,37 @@ export const createGoal = mutation({
   },
 })
 
+export const updateGoal = mutation({
+  args: {
+    goalId: v.id('goals'),
+    title: v.string(),
+    why: v.optional(v.string()),
+    area: v.optional(v.string()),
+    nextStep: v.optional(v.string()),
+    horizon: v.union(
+      v.literal('north_star'),
+      v.literal('quarter'),
+      v.literal('current'),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const goal = await ctx.db.get(args.goalId)
+    if (!goal) {
+      throw new Error('Goal not found.')
+    }
+
+    const now = Date.now()
+    await ctx.db.patch(args.goalId, {
+      title: cleanText(args.title) ?? goal.title,
+      why: cleanText(args.why),
+      area: cleanText(args.area),
+      nextStep: cleanText(args.nextStep),
+      horizon: args.horizon,
+      updatedAt: now,
+    })
+  },
+})
+
 export const setGoalStatus = mutation({
   args: {
     goalId: v.id('goals'),

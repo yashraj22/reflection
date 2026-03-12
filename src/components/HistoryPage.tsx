@@ -1,5 +1,6 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { api } from "../../convex/_generated/api";
 import { formatDisplayDate } from "../lib/date";
 
@@ -56,9 +57,15 @@ export default function HistoryPage() {
 									className="simple-row history-row content-auto"
 								>
 									<div className="history-head">
-										<p className="item-title">
-											{formatDisplayDate(entry.dateKey)}
-										</p>
+										<div>
+											<Link
+												to="/"
+												search={{ date: entry.dateKey }}
+												className="history-link"
+											>
+												{formatDisplayDate(entry.dateKey)}
+											</Link>
+										</div>
 										<p className="item-meta">
 											Mood {metricText(entry.mood)} / Energy{" "}
 											{metricText(entry.energy)} / Progress{" "}
@@ -66,6 +73,15 @@ export default function HistoryPage() {
 										</p>
 									</div>
 									<p className="item-copy line-clamp-3">{entry.excerpt}</p>
+									<div className="history-actions">
+										<Link
+											to="/"
+											search={{ date: entry.dateKey }}
+											className="history-link"
+										>
+											Open entry
+										</Link>
+									</div>
 								</li>
 							))
 						) : (

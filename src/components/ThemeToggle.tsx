@@ -2,10 +2,15 @@ import { useEffect, useState } from "react";
 
 type ThemeMode = "light" | "dark" | "auto";
 const STORAGE_KEY = "northstar-theme:v1";
+const THEME_OPTIONS: Array<{ mode: ThemeMode; label: string }> = [
+	{ mode: "light", label: "Light" },
+	{ mode: "dark", label: "Dark" },
+	{ mode: "auto", label: "Auto" },
+];
 
 function getInitialMode(): ThemeMode {
 	if (typeof window === "undefined") {
-		return "auto";
+		return "dark";
 	}
 
 	try {
@@ -14,10 +19,10 @@ function getInitialMode(): ThemeMode {
 			return stored;
 		}
 	} catch {
-		return "auto";
+		return "dark";
 	}
 
-	return "auto";
+	return "dark";
 }
 
 function applyThemeMode(mode: ThemeMode) {
@@ -45,6 +50,9 @@ export default function ThemeToggle() {
 
 	useEffect(() => {
 		applyThemeMode(mode);
+		try {
+			window.localStorage.setItem(STORAGE_KEY, mode);
+		} catch {}
 	}, [mode]);
 
 	useEffect(() => {
@@ -61,29 +69,20 @@ export default function ThemeToggle() {
 		};
 	}, [mode]);
 
-	function toggleMode() {
-		const nextMode: ThemeMode =
-			mode === "light" ? "dark" : mode === "dark" ? "auto" : "light";
-		setMode(nextMode);
-		applyThemeMode(nextMode);
-		try {
-			window.localStorage.setItem(STORAGE_KEY, nextMode);
-		} catch {}
-	}
-
-	const label =
-		mode === "auto"
-			? "Theme: auto. Activate to switch to light."
-			: `Theme: ${mode}. Activate to switch mode.`;
-
 	return (
-		<button
-			type="button"
-			onClick={toggleMode}
-			aria-label={label}
-			className="button-quiet text-sm"
-		>
-			Theme
-		</button>
+		<fieldset className="theme-control">
+			<legend className="sr-only">Theme</legend>
+			{THEME_OPTIONS.map((option) => (
+				<button
+					key={option.mode}
+					type="button"
+					onClick={() => setMode(option.mode)}
+					aria-pressed={mode === option.mode}
+					className={`theme-option ${mode === option.mode ? "is-active" : ""}`}
+				>
+					{option.label}
+				</button>
+			))}
+		</fieldset>
 	);
 }

@@ -2,22 +2,20 @@ export default function Footer() {
 	const year = new Date().getFullYear();
 
 	return (
-		<footer className="mt-20 border-t border-[var(--line)] px-4 pb-14 pt-10 text-[var(--sea-ink-soft)]">
-			<div className="page-wrap flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
-				<p className="m-0 text-sm">
+		<footer className="site-footer px-4">
+			<div className="page-wrap site-footer-inner">
+				<p className="site-footer-copy">
 					&copy; {year} Northstar Journal. Daily updates, goals, and context in
 					one loop.
 				</p>
-				<p className="island-kicker m-0">
-					Built with TanStack Start and Convex
-				</p>
+				<p className="site-footer-meta">Built with TanStack Start and Convex</p>
 			</div>
-			<div className="mt-4 flex justify-center gap-4">
+			<div className="site-footer-links">
 				<a
 					href="https://tanstack.com/start/latest"
 					target="_blank"
 					rel="noreferrer"
-					className="rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+					className="site-footer-link"
 				>
 					<span className="sr-only">TanStack Start docs</span>
 					<svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32">
@@ -31,7 +29,7 @@ export default function Footer() {
 					href="https://docs.convex.dev"
 					target="_blank"
 					rel="noreferrer"
-					className="rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+					className="site-footer-link"
 				>
 					<span className="sr-only">Convex docs</span>
 					<svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32">
