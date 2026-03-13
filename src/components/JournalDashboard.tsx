@@ -328,15 +328,15 @@ export default function JournalDashboard({
 	}
 
 	return (
-		<main id="content" className="site-main">
-			<div className="dashboard-wrap">
+		<main id="content" className="site-main" style={{ "--data-theme": "black" } as React.CSSProperties}>
+			<div className="dashboard-wrap" style={{ background: "var(--bg-base)", color: "var(--text)" }}>
 				<header className="dashboard-header-compact">
 					<div className="dashboard-header-copy">
-						<p className="hero-eyebrow">Northstar journal</p>
-						<h1 className="page-title page-title-dashboard">
+						<p className="hero-eyebrow" style={{ color: "var(--text-muted)" }}>Northstar journal</p>
+						<h1 className="page-title page-title-dashboard" style={{ fontSize: "2.5rem", letterSpacing: "-0.02em", fontWeight: 600 }}>
 							{formatDisplayDate(selectedDateKey)}
 						</h1>
-						<p className="page-subtitle page-subtitle-dashboard">
+						<p className="page-subtitle page-subtitle-dashboard" style={{ color: "var(--text-soft)", marginTop: "0.75rem" }}>
 							{heroSubtitle}
 						</p>
 					</div>
@@ -369,22 +369,22 @@ export default function JournalDashboard({
 					</div>
 				</header>
 
-				<div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_280px]">
-					<div className="space-y-8">
-						<section className="section-shell section-shell-reflection">
+				<div className="grid gap-12 xl:grid-cols-[minmax(0,1fr)_300px] py-12">
+					<div className="space-y-12">
+						<section className="section-shell section-shell-reflection" style={{ border: "none", background: "transparent", padding: 0 }}>
 							<div className="section-head">
 								<div>
-									<p className="section-kicker">Write</p>
-									<h2 className="section-title">Reflection</h2>
+									<p className="section-kicker" style={{ color: "var(--text-muted)", fontSize: "0.875rem", textTransform: "uppercase", letterSpacing: "0.08em" }}>Writing</p>
+									<h2 className="section-title" style={{ fontSize: "1.5rem", fontWeight: 600, marginTop: "0.5rem" }}>Today's reflection</h2>
 								</div>
 								<p className="section-note section-note-inline">
 									Start with the next step, then write the honest version.
 								</p>
 							</div>
 
-							<div className="field-grid">
+							<div className="field-grid" style={{ marginTop: "2rem" }}>
 								<InputField
-									label="Today's Step"
+									label="Next step"
 									name="intention"
 									value={reflectionDraft.intention}
 									onChange={(value) =>
@@ -394,7 +394,7 @@ export default function JournalDashboard({
 										}))
 									}
 									placeholder={
-										primaryGoal?.nextStep ?? "The smallest step that matters..."
+										primaryGoal?.nextStep ?? "What comes next..."
 									}
 								/>
 
@@ -821,13 +821,13 @@ export default function JournalDashboard({
 						) : null}
 					</div>
 
-						<aside className="space-y-6 xl:col-start-2" style={{ height: "fit-content" }}>
-							<section className="section-shell section-shell-compact sidebar-card sidebar-card-pulse bg-[color:var(--study-surface-alt)]">
+						<aside className="space-y-8 xl:col-start-2" style={{ height: "fit-content" }}>
+							<section className="section-shell section-shell-compact sidebar-card sidebar-card-pulse" style={{ border: "1px solid var(--border)", background: "transparent", borderRadius: "8px", padding: "1.5rem" }}>
 							<div className="section-head">
 								<div>
-									<p className="section-kicker">Pulse</p>
-									<h2 className="section-title">
-										{isTodayView ? "Today's Meters" : "Entry Meters"}
+									<p className="section-kicker" style={{ color: "var(--text-muted)", fontSize: "0.875rem", textTransform: "uppercase", letterSpacing: "0.08em" }}>Metrics</p>
+									<h2 className="section-title" style={{ fontSize: "1.125rem", fontWeight: 600, marginTop: "0.5rem" }}>
+										{isTodayView ? "Today's state" : "Entry state"}
 									</h2>
 								</div>
 							</div>
