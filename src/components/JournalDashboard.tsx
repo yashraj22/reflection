@@ -822,7 +822,7 @@ export default function JournalDashboard({
 					</div>
 
 						<aside className="space-y-8 xl:col-start-2" style={{ height: "fit-content" }}>
-							<section className="section-shell section-shell-compact sidebar-card sidebar-card-pulse" style={{ border: "1px solid var(--border)", background: "transparent", borderRadius: "8px", padding: "1.5rem" }}>
+							<section className="section-shell section-shell-compact sidebar-card sidebar-card-pulse" style={{ border: "1px solid var(--border)", background: "transparent", borderRadius: "0px", padding: "1.5rem" }}>
 							<div className="section-head">
 								<div>
 									<p className="section-kicker" style={{ color: "var(--text-muted)", fontSize: "0.875rem", textTransform: "uppercase", letterSpacing: "0.08em" }}>Metrics</p>
