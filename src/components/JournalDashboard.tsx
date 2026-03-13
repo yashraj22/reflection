@@ -328,7 +328,7 @@ export default function JournalDashboard({
 	}
 
 	return (
-		<main id="content" className="site-main" style={{ "--data-theme": "black" } as React.CSSProperties}>
+		<main id="content" className="site-main" style={{ "--data-theme": "dark" } as React.CSSProperties}>
 			<div className="dashboard-wrap" style={{ background: "var(--bg-base)", color: "var(--text)" }}>
 				<header className="dashboard-header-compact">
 					<div className="dashboard-header-copy">
