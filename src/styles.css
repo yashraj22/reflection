@@ -38,7 +38,7 @@
 	--page-width-wide: min(76rem, calc(100% - 2rem));
 }
 
-:root[data-theme="dark"] {
+:root[data-theme="black"] {
 	--bg-base: #12100d;
 	--surface: #171411;
 	--surface-muted: #171411;
@@ -60,7 +60,7 @@
 	--shadow-2: none;
 }
 
-:root[data-theme="black"] {
+:root[data-theme="dark"] {
 	--bg-base: #000000;
 	--surface: #0a0a0a;
 	--surface-muted: #0a0a0a;
