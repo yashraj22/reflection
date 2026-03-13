@@ -31,9 +31,9 @@
 	--tone-progress: var(--accent);
 	--shadow-1: none;
 	--shadow-2: none;
-	--radius-lg: 1.25rem;
-	--radius-md: 0.875rem;
-	--radius-sm: 0.75rem;
+	--radius-lg: 0rem;
+	--radius-md: 0rem;
+	--radius-sm: 0rem;
 	--page-width: min(76rem, calc(100% - 2rem));
 	--page-width-wide: min(76rem, calc(100% - 2rem));
 }
