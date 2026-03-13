@@ -821,7 +821,7 @@ export default function JournalDashboard({
 						) : null}
 					</div>
 
-						<aside className="space-y-6 xl:col-start-2">
+						<aside className="space-y-6 xl:col-start-2" style={{ height: "fit-content" }}>
 							<section className="section-shell section-shell-compact sidebar-card sidebar-card-pulse bg-[color:var(--study-surface-alt)]">
 							<div className="section-head">
 								<div>
