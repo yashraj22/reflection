@@ -339,7 +339,9 @@ export default function JournalDashboard({
 						<p className="page-subtitle page-subtitle-dashboard">
 							{heroSubtitle}
 						</p>
-						<div className="dashboard-header-stats">
+					</div>
+					<div className="dashboard-header-meta">
+						<div className="dashboard-header-stats flex flex-wrap gap-4 text-sm">
 							<span className="dashboard-header-stat">
 								{metrics.streak} day{metrics.streak === 1 ? "" : "s"} streak
 							</span>
@@ -347,21 +349,19 @@ export default function JournalDashboard({
 								Progress {metricValue(metrics.averageProgress)}
 							</span>
 							{primaryGoal ? (
-								<span className="dashboard-header-stat">
+								<span className="dashboard-header-stat truncate">
 									Current focus {primaryGoal.title}
 								</span>
 							) : null}
 						</div>
-					</div>
-					<div className="dashboard-header-meta">
-						<p className="status-text" aria-live="polite">
+						<p className="status-text mt-3" aria-live="polite">
 							{isAutoSavingReflection ? "Saving..." : visibleStatus}
 						</p>
 						{!isTodayView ? (
 							<Link
 								to="/"
 								search={{ date: undefined }}
-								className="button-secondary text-sm"
+								className="button-secondary text-sm mt-2"
 							>
 								Back to today
 							</Link>
@@ -369,8 +369,8 @@ export default function JournalDashboard({
 					</div>
 				</header>
 
-				<div className="dashboard-grid">
-					<div className="dashboard-main">
+				<div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_280px]">
+					<div className="space-y-8">
 						<section className="section-shell section-shell-reflection">
 							<div className="section-head">
 								<div>
@@ -597,7 +597,7 @@ export default function JournalDashboard({
 								)}
 							</section>
 
-							<section className="section-shell section-shell-compact support-card direction-card">
+							<section className="section-shell section-shell-compact support-card direction-card bg-[color:var(--study-surface-alt)]">
 								<div className="section-head">
 									<div>
 										<p className="section-kicker">Signal</p>
@@ -821,8 +821,8 @@ export default function JournalDashboard({
 						) : null}
 					</div>
 
-					<aside className="dashboard-sidebar">
-						<section className="section-shell section-shell-compact sidebar-card sidebar-card-pulse">
+						<aside className="space-y-6 xl:col-start-2">
+							<section className="section-shell section-shell-compact sidebar-card sidebar-card-pulse bg-[color:var(--study-surface-alt)]">
 							<div className="section-head">
 								<div>
 									<p className="section-kicker">Pulse</p>
