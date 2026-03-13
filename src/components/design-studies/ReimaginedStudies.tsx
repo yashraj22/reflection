@@ -1256,137 +1256,12 @@ function LedgerToday({ draft }: { draft: DraftState }) {
 		<div className="space-y-6">
 			<PageHeading
 				title="Today"
-				note="Keep the entry short and concrete."
+				note="Sequential entry with focused sidebar."
 				trailing={<p className="text-sm text-[color:var(--study-muted)]">March 9</p>}
 			/>
-			<div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_320px]">
+			<div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
 				<div className="space-y-5">
-					<Panel title="Write">
-						<div className="grid gap-4">
-							<InputRow
-								label="Next step"
-								value={draft.intention}
-								onChange={draft.setIntention}
-								placeholder="The next visible step"
-							/>
-							<TextAreaRow
-								label="Reflection"
-								value={draft.reflection}
-								onChange={draft.setReflection}
-								placeholder="What felt true today?"
-								rows={12}
-							/>
-						</div>
-					</Panel>
-					<div className="grid gap-5 md:grid-cols-2">
-						<Panel title="What happened">
-							<TextAreaRow
-								label="Summary"
-								value={draft.summary}
-								onChange={draft.setSummary}
-								placeholder="The shape of the day"
-								rows={5}
-							/>
-						</Panel>
-						<Panel title="Tomorrow">
-							<TextAreaRow
-								label="Start with"
-								value={draft.tomorrow}
-								onChange={draft.setTomorrow}
-								placeholder="How tomorrow should begin"
-								rows={5}
-							/>
-						</Panel>
-					</div>
-				</div>
-				<div className="space-y-5">
-					<Panel title="Current direction">
-						<GoalList />
-					</Panel>
-					<Panel title="Questions">
-						<PromptList onPick={draft.insertPrompt} />
-					</Panel>
-					<Panel title="State">
-						<ScoreRow
-							mood={draft.mood}
-							setMood={draft.setMood}
-							energy={draft.energy}
-							setEnergy={draft.setEnergy}
-							progress={draft.progress}
-							setProgress={draft.setProgress}
-							vertical
-						/>
-					</Panel>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function LedgerHistory() {
-	return (
-		<div className="space-y-6">
-			<PageHeading title="History" note="Recent entries, in order." />
-			<div className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_300px]">
-				<Panel>
-					<SimpleEntryList layout="rows" />
-				</Panel>
-				<div className="space-y-5">
-					<Panel title="Patterns">
-						<MetricsSummary compact />
-					</Panel>
-					<Panel title="Still active">
-						<GoalList dense />
-					</Panel>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function LedgerDashboard() {
-	return (
-		<div className="space-y-6">
-			<PageHeading title="Dashboard" note="Trend first. Context second." />
-			<MetricStrip
-				metrics={[
-					{ label: "Streak", value: `${STREAK_COUNT < 0 ? 0 : STREAK_COUNT} days` },
-					{ label: "Average mood", value: AVERAGES.mood },
-					{ label: "Active days", value: `${ACTIVE_DAYS}` },
-				]}
-			/>
-			<div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_320px]">
-				<Panel title="Past 12 days">
-					<TrendChart />
-				</Panel>
-				<div className="space-y-5">
-					<Panel title="Activity">
-						<ActivityGrid />
-					</Panel>
-					<Panel title="Goals">
-						<GoalList dense />
-					</Panel>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function NightDeskToday({ draft }: { draft: DraftState }) {
-	return (
-		<div className="space-y-5">
-			<PageHeading
-				title="Today"
-				note="One clear move, then write the day."
-				trailing={
-					<p className="font-mono text-xs text-[color:var(--study-muted)]">
-						autosave idle
-					</p>
-				}
-			/>
-			<div className="grid gap-5 xl:grid-cols-[240px_minmax(0,1fr)_280px]">
-				<div className="space-y-5">
-					<Panel title="Goal" className="bg-[color:var(--study-surface-alt)]">
+					<Panel title="Anchor" className="bg-[color:var(--study-surface-alt)]">
 						<GoalList dense />
 					</Panel>
 					<Panel title="State" className="bg-[color:var(--study-surface-alt)]">
@@ -1400,46 +1275,159 @@ function NightDeskToday({ draft }: { draft: DraftState }) {
 							vertical
 						/>
 					</Panel>
-				</div>
-				<Panel title="Reflection" className="bg-[color:var(--study-surface-alt)]">
-					<div className="grid gap-4">
-						<InputRow
-							label="Command"
-							value={draft.intention}
-							onChange={draft.setIntention}
-							placeholder="The next step"
-						/>
-						<TextAreaRow
-							label="Log"
-							value={draft.reflection}
-							onChange={draft.setReflection}
-							placeholder="Write the day plainly."
-							rows={16}
-						/>
-					</div>
-				</Panel>
-				<div className="space-y-5">
-					<Panel title="Questions" className="bg-[color:var(--study-surface-alt)]">
+					<Panel title="Prompts" className="bg-[color:var(--study-surface-alt)]">
 						<PromptList onPick={draft.insertPrompt} compact />
 					</Panel>
-					<Panel title="Next" className="bg-[color:var(--study-surface-alt)]">
+				</div>
+				<div className="space-y-5">
+					<InputRow
+						label="Next step"
+						value={draft.intention}
+						onChange={draft.setIntention}
+						placeholder="What comes next"
+					/>
+					<TextAreaRow
+						label="Reflection"
+						value={draft.reflection}
+						onChange={draft.setReflection}
+						placeholder="What happened, what it means."
+						rows={14}
+					/>
+					<div className="grid gap-5 md:grid-cols-2">
+						<TextAreaRow
+							label="Summary"
+							value={draft.summary}
+							onChange={draft.setSummary}
+							placeholder="The day in brief"
+							rows={6}
+						/>
 						<TextAreaRow
 							label="Tomorrow"
 							value={draft.tomorrow}
 							onChange={draft.setTomorrow}
-							placeholder="How tomorrow starts"
+							placeholder="How tomorrow opens"
 							rows={6}
 						/>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function LedgerHistory() {
+	return (
+		<div className="space-y-6">
+			<PageHeading title="History" note="Chronological record with sidebar insight." />
+			<div className="grid gap-6 xl:grid-cols-[240px_minmax(0,1fr)]">
+				<div className="space-y-5">
+					<Panel title="Insight" className="bg-[color:var(--study-surface-alt)]">
+						<MetricsSummary compact />
 					</Panel>
-					<Panel title="Summary" className="bg-[color:var(--study-surface-alt)]">
+					<Panel title="Active" className="bg-[color:var(--study-surface-alt)]">
+						<GoalList dense />
+					</Panel>
+				</div>
+				<Panel>
+					<SimpleEntryList layout="rows" />
+				</Panel>
+			</div>
+		</div>
+	);
+}
+
+function LedgerDashboard() {
+	return (
+		<div className="space-y-6">
+			<PageHeading title="Dashboard" note="Trend and context, sequentially." />
+			<MetricStrip
+				metrics={[
+					{ label: "Streak", value: `${STREAK_COUNT < 0 ? 0 : STREAK_COUNT} days` },
+					{ label: "Average mood", value: AVERAGES.mood },
+					{ label: "Active days", value: `${ACTIVE_DAYS}` },
+				]}
+			/>
+			<div className="grid gap-6 xl:grid-cols-[240px_minmax(0,1fr)]">
+				<div className="space-y-5">
+					<Panel title="Goals" className="bg-[color:var(--study-surface-alt)]">
+						<GoalList dense />
+					</Panel>
+					<Panel title="Activity" className="bg-[color:var(--study-surface-alt)]">
+						<ActivityGrid compact />
+					</Panel>
+				</div>
+				<Panel title="Trend">
+					<TrendChart />
+				</Panel>
+			</div>
+		</div>
+	);
+}
+
+function NightDeskToday({ draft }: { draft: DraftState }) {
+	return (
+		<div className="space-y-5">
+			<PageHeading
+				title="Today"
+				note="Write. Nothing else matters."
+				trailing={
+					<p className="font-mono text-xs text-[color:var(--study-muted)]">
+						idle
+					</p>
+				}
+			/>
+			<div className="grid gap-4 xl:grid-cols-[140px_minmax(0,1fr)]">
+				<div className="space-y-3">
+					<div className="text-[0.75rem] font-medium text-[color:var(--study-muted)] uppercase tracking-wider">
+						<p>Goal</p>
+					</div>
+					<div className="text-xs text-[color:var(--study-muted)]">
+						<GoalList dense />
+					</div>
+					<div className="text-[0.75rem] font-medium text-[color:var(--study-muted)] uppercase tracking-wider">
+						<p>State</p>
+					</div>
+					<ScoreRow
+						mood={draft.mood}
+						setMood={draft.setMood}
+						energy={draft.energy}
+						setEnergy={draft.setEnergy}
+						progress={draft.progress}
+						setProgress={draft.setProgress}
+						vertical
+					/>
+				</div>
+				<div className="space-y-4">
+					<InputRow
+						label="Command"
+						value={draft.intention}
+						onChange={draft.setIntention}
+						placeholder="The next step"
+					/>
+					<TextAreaRow
+						label="Log"
+						value={draft.reflection}
+						onChange={draft.setReflection}
+						placeholder="Write plainly."
+						rows={18}
+					/>
+					<div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px] lg:grid-cols-[minmax(0,1fr)_100px_100px]">
 						<TextAreaRow
-							label="Note"
+							label="Summary"
 							value={draft.summary}
 							onChange={draft.setSummary}
-							placeholder="One sentence"
+							placeholder="One note"
 							rows={4}
 						/>
-					</Panel>
+						<TextAreaRow
+							label="Tomorrow"
+							value={draft.tomorrow}
+							onChange={draft.setTomorrow}
+							placeholder="Resume here"
+							rows={4}
+						/>
+						<PromptList onPick={draft.insertPrompt} compact />
+					</div>
 				</div>
 			</div>
 		</div>
@@ -1448,47 +1436,48 @@ function NightDeskToday({ draft }: { draft: DraftState }) {
 
 function NightDeskHistory() {
 	return (
-		<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
-			<div className="space-y-5">
-				<PageHeading title="History" note="Recent logs." />
-				<div className="space-y-3">
-					{studyEntries.map((entry) => (
-						<Panel
-							key={entry.date}
-							className="bg-[color:var(--study-surface-alt)] px-4 py-4"
-						>
-							<div className="flex flex-wrap items-start justify-between gap-3">
-								<div>
-									<p className="font-mono text-xs text-[color:var(--study-muted)]">
-										{entry.date}
-									</p>
-									<h3 className="mt-1 text-base font-semibold">{entry.title}</h3>
-								</div>
-								<p className="font-mono text-xs text-[color:var(--study-muted)]">
-									{entry.mood}/{entry.energy}/{entry.progress}
-								</p>
-							</div>
-							<p className="mt-3 text-sm leading-6 text-[color:var(--study-muted)]">
+		<div className="space-y-5">
+			<PageHeading title="History" note="Quick review, minimal distraction." />
+			<div className="space-y-2">
+				{studyEntries.map((entry) => (
+					<div
+						key={entry.date}
+						className="grid gap-3 border-t border-[color:var(--study-border)] px-4 py-3 first:border-t-0 first:pt-0 md:grid-cols-[80px_minmax(0,1fr)_80px]"
+					>
+						<p className="text-xs font-mono text-[color:var(--study-muted)]">
+							{entry.date}
+						</p>
+						<div className="min-w-0">
+							<h3 className="truncate text-sm font-semibold">{entry.title}</h3>
+							<p className="mt-1 line-clamp-2 text-xs text-[color:var(--study-muted)]">
 								{entry.excerpt}
 							</p>
-						</Panel>
-					))}
-				</div>
+						</div>
+						<p className="text-xs font-mono text-[color:var(--study-muted)]">
+							{entry.mood}/{entry.energy}/{entry.progress}
+						</p>
+					</div>
+				))}
 			</div>
-			<div className="space-y-5">
-				<Panel title="Signals" className="bg-[color:var(--study-surface-alt)]">
-					<MetricsSummary compact />
-				</Panel>
-				<Panel
-					title="Questions that helped"
-					className="bg-[color:var(--study-surface-alt)]"
-				>
-					<div className="space-y-3 text-sm text-[color:var(--study-muted)]">
+			<div className="grid gap-4 md:grid-cols-2 pt-4 border-t border-[color:var(--study-border)]">
+				<div>
+					<p className="text-xs font-medium text-[color:var(--study-muted)] uppercase tracking-wider">
+						Signals
+					</p>
+					<div className="mt-3">
+						<MetricsSummary compact />
+					</div>
+				</div>
+				<div>
+					<p className="text-xs font-medium text-[color:var(--study-muted)] uppercase tracking-wider">
+						Prompts
+					</p>
+					<div className="mt-3 space-y-2 text-xs text-[color:var(--study-muted)]">
 						{studyPrompts.slice(0, 3).map((prompt) => (
 							<p key={prompt}>{prompt}</p>
 						))}
 					</div>
-				</Panel>
+				</div>
 			</div>
 		</div>
 	);
@@ -1497,25 +1486,26 @@ function NightDeskHistory() {
 function NightDeskDashboard() {
 	return (
 		<div className="space-y-5">
-			<PageHeading title="Dashboard" note="Low-noise review." />
-			<div className="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_320px]">
-				<Panel title="Trend" className="bg-[color:var(--study-surface-alt)]">
+			<PageHeading title="Dashboard" note="Clean signals, nothing more." />
+			<div className="space-y-4">
+				<div className="grid gap-3 border border-[color:var(--study-border)] bg-[color:var(--study-surface)] p-4">
+					<p className="text-xs font-medium text-[color:var(--study-muted)] uppercase tracking-wider">
+						Averages
+					</p>
+					<MetricStrip
+						metrics={[
+							{ label: "Mood", value: AVERAGES.mood },
+							{ label: "Energy", value: AVERAGES.energy },
+							{ label: "Progress", value: AVERAGES.progress },
+						]}
+					/>
+				</div>
+				<Panel title="Trend" className="bg-[color:var(--study-surface)]">
 					<TrendChart />
 				</Panel>
-				<div className="space-y-5">
-					<Panel title="Averages" className="bg-[color:var(--study-surface-alt)]">
-						<MetricStrip
-							metrics={[
-								{ label: "Mood", value: AVERAGES.mood },
-								{ label: "Energy", value: AVERAGES.energy },
-								{ label: "Progress", value: AVERAGES.progress },
-							]}
-						/>
-					</Panel>
-					<Panel title="Activity" className="bg-[color:var(--study-surface-alt)]">
-						<ActivityGrid compact />
-					</Panel>
-				</div>
+				<Panel title="Activity" className="bg-[color:var(--study-surface)]">
+					<ActivityGrid compact />
+				</Panel>
 			</div>
 		</div>
 	);
@@ -1523,15 +1513,15 @@ function NightDeskDashboard() {
 
 function DayPlanToday({ draft }: { draft: DraftState }) {
 	return (
-		<div className="space-y-5">
-			<PageHeading title="Today" note="Move through the entry in order." />
+		<div className="max-w-2xl space-y-5">
+			<PageHeading title="Today" note="One step at a time." />
 			<div className="space-y-4">
 				<NumberedSection step="01" title="Direction">
 					<InputRow
 						label="Next step"
 						value={draft.intention}
 						onChange={draft.setIntention}
-						placeholder="The smallest useful move"
+						placeholder="The move that matters most"
 					/>
 				</NumberedSection>
 				<NumberedSection step="02" title="Write">
@@ -1539,14 +1529,29 @@ function DayPlanToday({ draft }: { draft: DraftState }) {
 						label="Reflection"
 						value={draft.reflection}
 						onChange={draft.setReflection}
-						placeholder="Write what happened and what it meant."
-						rows={12}
+						placeholder="Write what happened and why it mattered."
+						rows={14}
 					/>
 				</NumberedSection>
-				<NumberedSection step="03" title="Questions">
-					<PromptList onPick={draft.insertPrompt} horizontal />
+				<NumberedSection step="03" title="Summary">
+					<TextAreaRow
+						label="What happened"
+						value={draft.summary}
+						onChange={draft.setSummary}
+						placeholder="The day in one paragraph"
+						rows={6}
+					/>
 				</NumberedSection>
-				<NumberedSection step="04" title="State">
+				<NumberedSection step="04" title="Tomorrow">
+					<TextAreaRow
+						label="Start here"
+						value={draft.tomorrow}
+						onChange={draft.setTomorrow}
+						placeholder="The opening move"
+						rows={5}
+					/>
+				</NumberedSection>
+				<NumberedSection step="05" title="State">
 					<ScoreRow
 						mood={draft.mood}
 						setMood={draft.setMood}
@@ -1556,26 +1561,9 @@ function DayPlanToday({ draft }: { draft: DraftState }) {
 						setProgress={draft.setProgress}
 					/>
 				</NumberedSection>
-				<div className="grid gap-4 md:grid-cols-2">
-					<NumberedSection step="05" title="Summary">
-						<TextAreaRow
-							label="What happened"
-							value={draft.summary}
-							onChange={draft.setSummary}
-							placeholder="The shape of the day"
-							rows={5}
-						/>
-					</NumberedSection>
-					<NumberedSection step="06" title="Tomorrow">
-						<TextAreaRow
-							label="Start here"
-							value={draft.tomorrow}
-							onChange={draft.setTomorrow}
-							placeholder="The opening move"
-							rows={5}
-						/>
-					</NumberedSection>
-				</div>
+				<NumberedSection step="06" title="Questions">
+					<PromptList onPick={draft.insertPrompt} compact />
+				</NumberedSection>
 			</div>
 		</div>
 	);
@@ -1605,30 +1593,33 @@ function NumberedSection({
 
 function DayPlanHistory() {
 	return (
-		<div className="space-y-6">
-			<PageHeading title="History" note="Grouped for quick review." />
-			<div className="space-y-4">
+		<div className="max-w-2xl space-y-6">
+			<PageHeading title="History" note="Sequential review by week." />
+			<div className="space-y-6">
 				{WEEK_GROUPS.map((group) => (
-					<Panel key={group.label} title={group.label}>
+					<div key={group.label} className="space-y-3">
+						<h3 className="text-sm font-semibold text-[color:var(--study-muted)] uppercase tracking-wider">
+							{group.label}
+						</h3>
 						<div className="space-y-4">
 							{group.items.map((entry) => (
 								<div
 									key={entry.date}
-									className="grid gap-3 border-t border-[color:var(--study-border)] pt-4 first:border-t-0 first:pt-0 md:grid-cols-[120px_minmax(0,1fr)]"
+									className="border-t border-[color:var(--study-border)] pt-4 first:border-t-0 first:pt-0"
 								>
-									<div className="text-sm text-[color:var(--study-muted)]">
-										{entry.date}
-									</div>
-									<div>
+									<div className="flex items-baseline justify-between gap-3">
 										<h3 className="text-base font-semibold">{entry.title}</h3>
-										<p className="mt-2 text-sm leading-6 text-[color:var(--study-muted)]">
-											{entry.excerpt}
+										<p className="text-sm text-[color:var(--study-muted)]">
+											{entry.date}
 										</p>
 									</div>
+									<p className="mt-2 text-sm leading-6 text-[color:var(--study-muted)]">
+										{entry.excerpt}
+									</p>
 								</div>
 							))}
 						</div>
-					</Panel>
+					</div>
 				))}
 			</div>
 		</div>
@@ -1637,19 +1628,24 @@ function DayPlanHistory() {
 
 function DayPlanDashboard() {
 	return (
-		<div className="space-y-6">
-			<PageHeading title="Dashboard" note="Review the week in sequence." />
-			<MetricStrip
-				metrics={[
-					{ label: "Average mood", value: AVERAGES.mood },
-					{ label: "Average energy", value: AVERAGES.energy },
-					{ label: "Average progress", value: AVERAGES.progress },
-				]}
-			/>
-			<Panel title="Trend">
-				<TrendChart />
-			</Panel>
-			<div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_280px]">
+		<div className="max-w-2xl space-y-6">
+			<PageHeading title="Dashboard" note="Week review, step by step." />
+			<div className="space-y-4">
+				<div className="border border-[color:var(--study-border)] bg-[color:var(--study-surface)] p-4">
+					<p className="text-sm font-semibold text-[color:var(--study-muted)] uppercase tracking-wider mb-3">
+						Averages
+					</p>
+					<MetricStrip
+						metrics={[
+							{ label: "Mood", value: AVERAGES.mood },
+							{ label: "Energy", value: AVERAGES.energy },
+							{ label: "Progress", value: AVERAGES.progress },
+						]}
+					/>
+				</div>
+				<Panel title="Trend">
+					<TrendChart />
+				</Panel>
 				<Panel title="Activity">
 					<ActivityGrid />
 				</Panel>
@@ -1663,42 +1659,58 @@ function DayPlanDashboard() {
 
 function BoardToday({ draft }: { draft: DraftState }) {
 	return (
-		<div className="space-y-5">
-			<PageHeading title="Today" note="Everything needed for a fast check-in." />
-			<Panel title="Current goal" className="bg-[color:var(--study-surface-alt)]">
-				<div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_240px] md:items-center">
-					<div>
-						<p className="text-base font-semibold">{studyGoals[0].title}</p>
-						<p className="mt-1 text-sm text-[color:var(--study-muted)]">
-							{studyGoals[0].nextStep}
-						</p>
-					</div>
-					<GhostButton>Use as intention</GhostButton>
-				</div>
-			</Panel>
-			<div className="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-				<Panel title="Write">
-					<div className="grid gap-4">
-						<InputRow
-							label="Next step"
-							value={draft.intention}
-							onChange={draft.setIntention}
-							placeholder="What matters next"
-						/>
-						<TextAreaRow
-							label="Reflection"
-							value={draft.reflection}
-							onChange={draft.setReflection}
-							placeholder="Write the day."
-							rows={12}
-						/>
-					</div>
-				</Panel>
-				<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-1">
-					<Panel title="Questions">
-						<PromptList onPick={draft.insertPrompt} compact />
+		<div className="space-y-6">
+			<PageHeading title="Today" note="Clean cards, breathing room." />
+			<div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_240px]">
+				<div className="space-y-6">
+					<Panel title="Write">
+						<div className="space-y-4">
+							<InputRow
+								label="Next step"
+								value={draft.intention}
+								onChange={draft.setIntention}
+								placeholder="What matters next"
+							/>
+							<TextAreaRow
+								label="Reflection"
+								value={draft.reflection}
+								onChange={draft.setReflection}
+								placeholder="Write the day clearly."
+								rows={12}
+							/>
+						</div>
 					</Panel>
-					<Panel title="State">
+					<div className="grid gap-6 md:grid-cols-2">
+						<Panel title="Summary">
+							<TextAreaRow
+								label="What happened"
+								value={draft.summary}
+								onChange={draft.setSummary}
+								placeholder="What mattered"
+								rows={6}
+							/>
+						</Panel>
+						<Panel title="Tomorrow">
+							<TextAreaRow
+								label="Opening move"
+								value={draft.tomorrow}
+								onChange={draft.setTomorrow}
+								placeholder="Where to resume"
+								rows={6}
+							/>
+						</Panel>
+					</div>
+				</div>
+				<div className="space-y-6">
+					<Panel title="Goal" className="bg-[color:var(--study-surface-alt)]">
+						<div>
+							<p className="text-sm font-semibold">{studyGoals[0].title}</p>
+							<p className="mt-2 text-xs text-[color:var(--study-muted)]">
+								{studyGoals[0].nextStep}
+							</p>
+						</div>
+					</Panel>
+					<Panel title="State" className="bg-[color:var(--study-surface-alt)]">
 						<ScoreRow
 							mood={draft.mood}
 							setMood={draft.setMood}
@@ -1709,27 +1721,10 @@ function BoardToday({ draft }: { draft: DraftState }) {
 							vertical
 						/>
 					</Panel>
+					<Panel title="Questions" className="bg-[color:var(--study-surface-alt)]">
+						<PromptList onPick={draft.insertPrompt} compact />
+					</Panel>
 				</div>
-			</div>
-			<div className="grid gap-5 md:grid-cols-2">
-				<Panel title="Summary">
-					<TextAreaRow
-						label="What happened"
-						value={draft.summary}
-						onChange={draft.setSummary}
-						placeholder="What stood out"
-						rows={5}
-					/>
-				</Panel>
-				<Panel title="Tomorrow">
-					<TextAreaRow
-						label="Opening move"
-						value={draft.tomorrow}
-						onChange={draft.setTomorrow}
-						placeholder="Where to start"
-						rows={5}
-					/>
-				</Panel>
 			</div>
 		</div>
 	);
@@ -1738,33 +1733,35 @@ function BoardToday({ draft }: { draft: DraftState }) {
 function BoardHistory() {
 	return (
 		<div className="space-y-6">
-			<PageHeading title="History" note="Scan by card, then open the one you need." />
-			<SimpleEntryList layout="cards" />
+			<PageHeading title="History" note="Card grid with generous spacing." />
+			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<SimpleEntryList layout="cards" />
+			</div>
 		</div>
 	);
 }
 
 function BoardDashboard() {
 	return (
-		<div className="space-y-5">
+		<div className="space-y-6">
 			<PageHeading
 				title="Dashboard"
-				note="A compact board for trend, activity, and goals."
+				note="Three cards: trend, activity, goals."
 			/>
-			<div className="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+			<div className="grid gap-6 xl:grid-cols-3">
 				<Panel title="Trend">
 					<TrendChart />
 				</Panel>
 				<Panel title="Activity">
 					<ActivityGrid />
 				</Panel>
-			</div>
-			<div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
-				<Panel title="Averages">
-					<MetricsSummary compact />
-				</Panel>
 				<Panel title="Goals">
 					<GoalList dense />
+				</Panel>
+			</div>
+			<div className="grid gap-6 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+				<Panel title="Averages">
+					<MetricsSummary compact />
 				</Panel>
 				<Panel title="Recent">
 					<div className="space-y-3">
@@ -1788,49 +1785,61 @@ function BoardDashboard() {
 
 function RibbonToday({ draft }: { draft: DraftState }) {
 	return (
-		<div className="space-y-0 border border-[color:var(--study-border)] bg-[color:var(--study-surface)]">
-			<RibbonRow label="Goal">
-				<p className="text-sm">{studyGoals[0].title}</p>
-			</RibbonRow>
-			<RibbonRow label="Next step">
-				<InputRow
-					label="Direction"
-					value={draft.intention}
-					onChange={draft.setIntention}
-					placeholder="The smallest useful step"
-				/>
-			</RibbonRow>
-			<RibbonRow label="Write">
-				<TextAreaRow
-					label="Reflection"
-					value={draft.reflection}
-					onChange={draft.setReflection}
-					placeholder="Keep it plain."
-					rows={12}
-				/>
-			</RibbonRow>
-			<RibbonRow label="Questions">
-				<PromptList onPick={draft.insertPrompt} compact />
-			</RibbonRow>
-			<RibbonRow label="State">
-				<ScoreRow
-					mood={draft.mood}
-					setMood={draft.setMood}
-					energy={draft.energy}
-					setEnergy={draft.setEnergy}
-					progress={draft.progress}
-					setProgress={draft.setProgress}
-				/>
-			</RibbonRow>
-			<RibbonRow label="Tomorrow">
-				<TextAreaRow
-					label="Start with"
-					value={draft.tomorrow}
-					onChange={draft.setTomorrow}
-					placeholder="The first move"
-					rows={5}
-				/>
-			</RibbonRow>
+		<div className="space-y-5">
+			<PageHeading title="Today" note="Read top to bottom." />
+			<div className="border border-[color:var(--study-border)] bg-[color:var(--study-surface)]">
+				<RibbonRow label="Goal">
+					<p className="text-sm font-semibold">{studyGoals[0].title}</p>
+				</RibbonRow>
+				<RibbonRow label="Next">
+					<InputRow
+						label="Direction"
+						value={draft.intention}
+						onChange={draft.setIntention}
+						placeholder="What comes next"
+					/>
+				</RibbonRow>
+				<RibbonRow label="Write">
+					<TextAreaRow
+						label="Reflection"
+						value={draft.reflection}
+						onChange={draft.setReflection}
+						placeholder="Write the day."
+						rows={14}
+					/>
+				</RibbonRow>
+				<RibbonRow label="Summary">
+					<TextAreaRow
+						label="What happened"
+						value={draft.summary}
+						onChange={draft.setSummary}
+						placeholder="One paragraph"
+						rows={5}
+					/>
+				</RibbonRow>
+				<RibbonRow label="Tomorrow">
+					<TextAreaRow
+						label="Resume here"
+						value={draft.tomorrow}
+						onChange={draft.setTomorrow}
+						placeholder="Opening move"
+						rows={4}
+					/>
+				</RibbonRow>
+				<RibbonRow label="State">
+					<ScoreRow
+						mood={draft.mood}
+						setMood={draft.setMood}
+						energy={draft.energy}
+						setEnergy={draft.setEnergy}
+						progress={draft.progress}
+						setProgress={draft.setProgress}
+					/>
+				</RibbonRow>
+				<RibbonRow label="Questions">
+					<PromptList onPick={draft.insertPrompt} compact />
+				</RibbonRow>
+			</div>
 		</div>
 	);
 }
@@ -1853,21 +1862,21 @@ function RibbonRow({
 function RibbonHistoryPage() {
 	return (
 		<div className="space-y-5">
-			<PageHeading title="History" note="A single reading line." />
-			<div className="border border-[color:var(--study-border)] bg-[color:var(--study-surface)]">
+			<PageHeading title="History" note="Sequential flow, one entry per line." />
+			<div className="space-y-0 border border-[color:var(--study-border)] bg-[color:var(--study-surface)]">
 				{studyEntries.map((entry) => (
 					<div
 						key={entry.date}
-						className="grid gap-3 border-t border-[color:var(--study-border)] px-4 py-4 first:border-t-0 md:grid-cols-[120px_minmax(0,1fr)_120px]"
+						className="grid gap-3 border-t border-[color:var(--study-border)] px-5 py-4 first:border-t-0 md:grid-cols-[100px_minmax(0,1fr)_100px]"
 					>
-						<p className="text-sm text-[color:var(--study-muted)]">{entry.date}</p>
+						<p className="text-sm font-mono text-[color:var(--study-muted)]">{entry.date}</p>
 						<div>
 							<h3 className="text-base font-semibold">{entry.title}</h3>
-							<p className="mt-2 text-sm text-[color:var(--study-muted)]">
+							<p className="mt-1 text-sm text-[color:var(--study-muted)] line-clamp-2">
 								{entry.excerpt}
 							</p>
 						</div>
-						<p className="text-sm text-[color:var(--study-muted)]">
+						<p className="text-sm font-mono text-[color:var(--study-muted)]">
 							{entry.mood}/{entry.energy}/{entry.progress}
 						</p>
 					</div>
@@ -1880,8 +1889,8 @@ function RibbonHistoryPage() {
 function RibbonDashboardPage() {
 	return (
 		<div className="space-y-5">
-			<PageHeading title="Dashboard" note="Everything arranged as strips." />
-			<div className="space-y-3">
+			<PageHeading title="Dashboard" note="Three horizontal strips." />
+			<div className="space-y-4">
 				<RibbonPanel title="Trend">
 					<TrendChart />
 				</RibbonPanel>
@@ -1889,7 +1898,7 @@ function RibbonDashboardPage() {
 					<ActivityGrid />
 				</RibbonPanel>
 				<RibbonPanel title="Averages">
-					<MetricsSummary />
+					<MetricsSummary compact />
 				</RibbonPanel>
 			</div>
 		</div>
@@ -1916,12 +1925,22 @@ function RibbonPanel({
 function ArchiveToday({ draft }: { draft: DraftState }) {
 	return (
 		<div className="space-y-6">
-			<PageHeading title="Today" note="A narrow page, with context beside it." />
-			<div className="grid gap-6 xl:grid-cols-[200px_minmax(0,1fr)]">
-				<div className="space-y-5">
-					<div className="space-y-2 text-sm text-[color:var(--study-muted)]">
-						<p>March 9</p>
-						<p>{studyGoals[0].title}</p>
+			<PageHeading title="Today" note="Sidebar context, full-width writing." />
+			<div className="grid gap-8 xl:grid-cols-[220px_minmax(0,1fr)]">
+				<div className="space-y-4">
+					<div>
+						<p className="text-xs font-medium text-[color:var(--study-muted)] uppercase tracking-wider mb-2">
+							Date
+						</p>
+						<p className="text-sm">March 9</p>
+					</div>
+					<div>
+						<p className="text-xs font-medium text-[color:var(--study-muted)] uppercase tracking-wider mb-2">
+							Goal
+						</p>
+						<p className="text-sm text-[color:var(--study-muted)]">
+							{studyGoals[0].title}
+						</p>
 					</div>
 					<Panel title="State" compact className="bg-[color:var(--study-surface-alt)]">
 						<ScoreRow
@@ -1935,48 +1954,41 @@ function ArchiveToday({ draft }: { draft: DraftState }) {
 						/>
 					</Panel>
 				</div>
-				<div className="space-y-5">
-					<div className="max-w-3xl space-y-5">
-						<InputRow
-							label="Next step"
-							value={draft.intention}
-							onChange={draft.setIntention}
-							placeholder="The one move that matters"
-						/>
-						<div className="flex flex-wrap gap-2">
-							{studyPrompts.map((prompt) => (
-								<GhostButton
-									key={prompt}
-									onClick={() => draft.insertPrompt(prompt)}
-									className="w-auto"
-								>
-									{prompt}
-								</GhostButton>
-							))}
-						</div>
+				<div className="max-w-4xl space-y-6">
+					<InputRow
+						label="Next step"
+						value={draft.intention}
+						onChange={draft.setIntention}
+						placeholder="The one move that matters"
+					/>
+					<TextAreaRow
+						label="Reflection"
+						value={draft.reflection}
+						onChange={draft.setReflection}
+						placeholder="Write clearly and completely."
+						rows={16}
+					/>
+					<div className="grid gap-6 md:grid-cols-2">
 						<TextAreaRow
-							label="Reflection"
-							value={draft.reflection}
-							onChange={draft.setReflection}
-							placeholder="Write without filler."
-							rows={14}
+							label="Summary"
+							value={draft.summary}
+							onChange={draft.setSummary}
+							placeholder="What happened"
+							rows={6}
 						/>
-						<div className="grid gap-5 md:grid-cols-2">
-							<TextAreaRow
-								label="Summary"
-								value={draft.summary}
-								onChange={draft.setSummary}
-								placeholder="What happened"
-								rows={5}
-							/>
-							<TextAreaRow
-								label="Tomorrow"
-								value={draft.tomorrow}
-								onChange={draft.setTomorrow}
-								placeholder="Where to resume"
-								rows={5}
-							/>
-						</div>
+						<TextAreaRow
+							label="Tomorrow"
+							value={draft.tomorrow}
+							onChange={draft.setTomorrow}
+							placeholder="Resume here"
+							rows={6}
+						/>
+					</div>
+					<div>
+						<p className="text-xs font-medium text-[color:var(--study-muted)] uppercase tracking-wider mb-3">
+							Questions
+						</p>
+						<PromptList onPick={draft.insertPrompt} compact />
 					</div>
 				</div>
 			</div>
@@ -1987,32 +1999,29 @@ function ArchiveToday({ draft }: { draft: DraftState }) {
 function ArchiveHistoryPage() {
 	return (
 		<div className="space-y-6">
-			<PageHeading title="History" note="An archive view, month first." />
-			<div className="space-y-6">
-				<div className="grid gap-4 md:grid-cols-[120px_minmax(0,1fr)]">
-					<div className="text-sm font-medium text-[color:var(--study-muted)]">
+			<PageHeading title="History" note="Organized chronologically by month." />
+			<div className="max-w-3xl space-y-8">
+				<div>
+					<h3 className="text-sm font-semibold text-[color:var(--study-muted)] uppercase tracking-wider mb-6">
 						March
-					</div>
-					<div className="space-y-4">
+					</h3>
+					<div className="space-y-6">
 						{studyEntries.map((entry) => (
-							<div
-								key={entry.date}
-								className="border-t border-[color:var(--study-border)] pt-4 first:border-t-0 first:pt-0"
-							>
-								<div className="flex flex-wrap items-start justify-between gap-3">
+							<div key={entry.date} className="border-t border-[color:var(--study-border)] pt-6 first:border-t-0 first:pt-0">
+								<div className="flex items-start justify-between gap-4 mb-2">
 									<div>
-										<p className="text-sm text-[color:var(--study-muted)]">
+										<p className="text-xs font-mono text-[color:var(--study-muted)]">
 											{entry.date}
 										</p>
-										<h3 className="mt-1 text-base font-semibold">
+										<h3 className="mt-2 text-base font-semibold">
 											{entry.title}
 										</h3>
 									</div>
-									<p className="text-sm text-[color:var(--study-muted)]">
+									<p className="text-xs font-mono text-[color:var(--study-muted)] whitespace-nowrap">
 										{entry.mood}/{entry.energy}/{entry.progress}
 									</p>
 								</div>
-								<p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--study-muted)]">
+								<p className="mt-3 max-w-2xl text-sm leading-6 text-[color:var(--study-muted)]">
 									{entry.excerpt}
 								</p>
 							</div>
@@ -2027,21 +2036,21 @@ function ArchiveHistoryPage() {
 function ArchiveDashboardPage() {
 	return (
 		<div className="space-y-6">
-			<PageHeading title="Dashboard" note="Activity first, trend second." />
-			<div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
-				<Panel title="Activity" className="bg-[color:var(--study-surface)]">
+			<PageHeading title="Dashboard" note="Activity, averages, then trend." />
+			<div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_240px]">
+				<Panel title="Activity">
 					<ActivityGrid />
 				</Panel>
-				<div className="space-y-5">
-					<Panel title="Averages" className="bg-[color:var(--study-surface)]">
+				<div className="space-y-6">
+					<Panel title="Averages" className="bg-[color:var(--study-surface-alt)]">
 						<MetricsSummary compact />
 					</Panel>
-					<Panel title="Days active" className="bg-[color:var(--study-surface)]">
-						<p className="text-[1.8rem] font-semibold tracking-[-0.05em]">
+					<Panel title="Active days" className="bg-[color:var(--study-surface-alt)]">
+						<p className="text-2xl font-semibold tracking-tight">
 							{ACTIVE_DAYS}
 						</p>
-						<p className="mt-2 text-sm text-[color:var(--study-muted)]">
-							Marked cells in the current grid.
+						<p className="mt-2 text-xs text-[color:var(--study-muted)]">
+							Days with entries
 						</p>
 					</Panel>
 				</div>
@@ -2055,13 +2064,13 @@ function ArchiveDashboardPage() {
 
 function FolioToday({ draft }: { draft: DraftState }) {
 	return (
-		<div className="space-y-6">
-			<PageHeading title="Today" note="More room for the writing, less around it." />
-			<div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
-				<div className="space-y-5">
+		<div className="space-y-8">
+			<PageHeading title="Today" note="Gallery layout with generous margins." />
+			<div className="grid gap-8 xl:grid-cols-[280px_minmax(0,1fr)]">
+				<div className="space-y-6">
 					<Panel title="Direction" className="bg-[color:var(--study-surface-alt)]">
-						<p className="text-base font-semibold">{studyGoals[0].title}</p>
-						<p className="mt-2 text-sm text-[color:var(--study-muted)]">
+						<p className="font-semibold leading-relaxed">{studyGoals[0].title}</p>
+						<p className="mt-3 text-sm text-[color:var(--study-muted)] leading-relaxed">
 							{studyGoals[0].nextStep}
 						</p>
 					</Panel>
@@ -2082,36 +2091,34 @@ function FolioToday({ draft }: { draft: DraftState }) {
 							value={draft.tomorrow}
 							onChange={draft.setTomorrow}
 							placeholder="Where the next day begins"
-							rows={5}
+							rows={6}
 						/>
 					</Panel>
 				</div>
-				<div className="space-y-5">
+				<div className="max-w-3xl space-y-7">
 					<InputRow
 						label="Next step"
 						value={draft.intention}
 						onChange={draft.setIntention}
-						placeholder="What you are trying to move"
+						placeholder="What you're working toward"
 					/>
 					<TextAreaRow
 						label="Reflection"
 						value={draft.reflection}
 						onChange={draft.setReflection}
-						placeholder="Write the entry."
-						rows={14}
+						placeholder="Write the entry with care."
+						rows={16}
 					/>
-					<div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_220px]">
-						<TextAreaRow
-							label="Summary"
-							value={draft.summary}
-							onChange={draft.setSummary}
-							placeholder="One paragraph"
-							rows={6}
-						/>
-						<Panel title="Questions" className="bg-[color:var(--study-surface-alt)]">
-							<PromptList onPick={draft.insertPrompt} compact />
-						</Panel>
-					</div>
+					<TextAreaRow
+						label="Summary"
+						value={draft.summary}
+						onChange={draft.setSummary}
+						placeholder="One full paragraph"
+						rows={6}
+					/>
+					<Panel title="Questions" className="bg-[color:var(--study-surface-alt)]">
+						<PromptList onPick={draft.insertPrompt} compact />
+					</Panel>
 				</div>
 			</div>
 		</div>
@@ -2120,22 +2127,24 @@ function FolioToday({ draft }: { draft: DraftState }) {
 
 function FolioHistoryPage() {
 	return (
-		<div className="space-y-6">
-			<PageHeading title="History" note="Wide margins, fast scanning." />
-			<div className="space-y-5">
+		<div className="space-y-8">
+			<PageHeading title="History" note="Portfolio view with breathing room." />
+			<div className="max-w-3xl space-y-8">
 				{studyEntries.map((entry) => (
 					<div
 						key={entry.date}
-						className="grid gap-4 border-t border-[color:var(--study-border)] pt-5 first:border-t-0 first:pt-0 md:grid-cols-[110px_minmax(0,1fr)_110px]"
+						className="grid gap-5 border-t border-[color:var(--study-border)] pt-8 first:border-t-0 first:pt-0 md:grid-cols-[100px_minmax(0,1fr)_100px]"
 					>
-						<p className="text-sm text-[color:var(--study-muted)]">{entry.date}</p>
+						<p className="text-xs font-mono text-[color:var(--study-muted)] uppercase">
+							{entry.date}
+						</p>
 						<div>
-							<h3 className="text-[1.05rem] font-semibold">{entry.title}</h3>
-							<p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--study-muted)]">
+							<h3 className="text-lg font-semibold leading-tight">{entry.title}</h3>
+							<p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--study-muted)]">
 								{entry.excerpt}
 							</p>
 						</div>
-						<p className="text-sm text-[color:var(--study-muted)]">
+						<p className="text-xs font-mono text-[color:var(--study-muted)]">
 							{entry.mood}/{entry.energy}/{entry.progress}
 						</p>
 					</div>
@@ -2147,29 +2156,35 @@ function FolioHistoryPage() {
 
 function FolioDashboardPage() {
 	return (
-		<div className="space-y-6">
-			<PageHeading title="Dashboard" note="Airy framing around the metrics." />
-			<div className="grid gap-5 md:grid-cols-3">
-				<div className="border-t border-[color:var(--study-border)] pt-4">
-					<p className="text-sm text-[color:var(--study-muted)]">Mood</p>
-					<p className="mt-1 text-[2rem] font-semibold tracking-[-0.05em]">
+		<div className="space-y-8">
+			<PageHeading title="Dashboard" note="Elegant display of key metrics." />
+			<div className="grid gap-8 md:grid-cols-3">
+				<div className="border-t-2 border-[color:var(--study-accent)] pt-6">
+					<p className="text-xs font-medium text-[color:var(--study-muted)] uppercase tracking-wider">
+						Mood
+					</p>
+					<p className="mt-3 text-3xl font-light tracking-tight">
 						{AVERAGES.mood}
 					</p>
 				</div>
-				<div className="border-t border-[color:var(--study-border)] pt-4">
-					<p className="text-sm text-[color:var(--study-muted)]">Energy</p>
-					<p className="mt-1 text-[2rem] font-semibold tracking-[-0.05em]">
+				<div className="border-t-2 border-[color:var(--study-accent)] pt-6">
+					<p className="text-xs font-medium text-[color:var(--study-muted)] uppercase tracking-wider">
+						Energy
+					</p>
+					<p className="mt-3 text-3xl font-light tracking-tight">
 						{AVERAGES.energy}
 					</p>
 				</div>
-				<div className="border-t border-[color:var(--study-border)] pt-4">
-					<p className="text-sm text-[color:var(--study-muted)]">Progress</p>
-					<p className="mt-1 text-[2rem] font-semibold tracking-[-0.05em]">
+				<div className="border-t-2 border-[color:var(--study-accent)] pt-6">
+					<p className="text-xs font-medium text-[color:var(--study-muted)] uppercase tracking-wider">
+						Progress
+					</p>
+					<p className="mt-3 text-3xl font-light tracking-tight">
 						{AVERAGES.progress}
 					</p>
 				</div>
 			</div>
-			<div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_280px]">
+			<div className="grid gap-8 xl:grid-cols-[minmax(0,1.5fr)_300px]">
 				<Panel title="Trend">
 					<TrendChart />
 				</Panel>
@@ -2186,62 +2201,68 @@ function GridToday({ draft }: { draft: DraftState }) {
 		<div className="space-y-5">
 			<PageHeading
 				title="Today"
-				note="A strict grid for writing, scoring, and next steps."
+				note="Modular grid with clear boundaries."
 				trailing={
 					<p className="font-mono text-xs text-[color:var(--study-muted)]">
-						layout 12
+						12c system
 					</p>
 				}
 			/>
 			<div className="grid gap-5 xl:grid-cols-12">
-				<Panel title="Write" className="xl:col-span-8 bg-[color:var(--study-surface-alt)]">
-					<div className="grid gap-4">
+				<Panel title="Write" className="xl:col-span-7">
+					<div className="space-y-4">
 						<InputRow
 							label="Next step"
 							value={draft.intention}
 							onChange={draft.setIntention}
-							placeholder="The next visible move"
+							placeholder="What matters next"
 						/>
 						<TextAreaRow
 							label="Reflection"
 							value={draft.reflection}
 							onChange={draft.setReflection}
-							placeholder="Write without decoration."
-							rows={14}
+							placeholder="Write clearly and directly."
+							rows={15}
 						/>
 					</div>
 				</Panel>
-				<Panel title="State" className="xl:col-span-4 bg-[color:var(--study-surface-alt)]">
-					<ScoreRow
-						mood={draft.mood}
-						setMood={draft.setMood}
-						energy={draft.energy}
-						setEnergy={draft.setEnergy}
-						progress={draft.progress}
-						setProgress={draft.setProgress}
-						vertical
-					/>
-				</Panel>
+				<div className="grid gap-5 xl:col-span-5 xl:grid-rows-2">
+					<Panel title="State" className="bg-[color:var(--study-surface-alt)]">
+						<ScoreRow
+							mood={draft.mood}
+							setMood={draft.setMood}
+							energy={draft.energy}
+							setEnergy={draft.setEnergy}
+							progress={draft.progress}
+							setProgress={draft.setProgress}
+							vertical
+						/>
+					</Panel>
+					<Panel title="Context" className="bg-[color:var(--study-surface-alt)]">
+						<p className="text-sm mb-2">{studyGoals[0].title}</p>
+						<PromptList onPick={draft.insertPrompt} compact />
+					</Panel>
+				</div>
 				<Panel title="Summary" className="xl:col-span-4 bg-[color:var(--study-surface-alt)]">
 					<TextAreaRow
 						label="What happened"
 						value={draft.summary}
 						onChange={draft.setSummary}
-						placeholder="One short recap"
-						rows={6}
+						placeholder="One paragraph recap"
+						rows={7}
 					/>
-				</Panel>
-				<Panel title="Questions" className="xl:col-span-4 bg-[color:var(--study-surface-alt)]">
-					<PromptList onPick={draft.insertPrompt} compact />
 				</Panel>
 				<Panel title="Tomorrow" className="xl:col-span-4 bg-[color:var(--study-surface-alt)]">
 					<TextAreaRow
-						label="Start here"
+						label="Resume here"
 						value={draft.tomorrow}
 						onChange={draft.setTomorrow}
-						placeholder="Where the day reopens"
-						rows={6}
+						placeholder="Opening move"
+						rows={7}
 					/>
+				</Panel>
+				<Panel title="Goals" className="xl:col-span-4 bg-[color:var(--study-surface-alt)]">
+					<GoalList dense />
 				</Panel>
 			</div>
 		</div>
@@ -2251,9 +2272,9 @@ function GridToday({ draft }: { draft: DraftState }) {
 function GridHistoryPage() {
 	return (
 		<div className="space-y-5">
-			<PageHeading title="History" note="Row-based review." />
-			<div className="overflow-hidden border border-[color:var(--study-border)] bg-[color:var(--study-surface-alt)]">
-				<div className="hidden grid-cols-[100px_minmax(0,1fr)_120px] gap-4 border-b border-[color:var(--study-border)] px-4 py-3 text-xs uppercase tracking-[0.12em] text-[color:var(--study-muted)] md:grid">
+			<PageHeading title="History" note="Structured table view." />
+			<div className="overflow-x-auto border border-[color:var(--study-border)] bg-[color:var(--study-surface)]">
+				<div className="grid grid-cols-[80px_minmax(0,1fr)_100px] gap-4 border-b border-[color:var(--study-border)] px-5 py-3 text-xs font-medium uppercase tracking-wider text-[color:var(--study-muted)]">
 					<span>Date</span>
 					<span>Entry</span>
 					<span>Scores</span>
@@ -2261,16 +2282,16 @@ function GridHistoryPage() {
 				{studyEntries.map((entry) => (
 					<div
 						key={entry.date}
-						className="grid gap-3 border-t border-[color:var(--study-border)] px-4 py-4 first:border-t-0 md:grid-cols-[100px_minmax(0,1fr)_120px]"
+						className="grid grid-cols-[80px_minmax(0,1fr)_100px] gap-4 border-t border-[color:var(--study-border)] px-5 py-4 first:border-t-0 items-start"
 					>
-						<p className="text-sm text-[color:var(--study-muted)]">{entry.date}</p>
+						<p className="text-xs font-mono text-[color:var(--study-muted)]">{entry.date}</p>
 						<div>
-							<h3 className="text-base font-semibold">{entry.title}</h3>
-							<p className="mt-2 text-sm leading-6 text-[color:var(--study-muted)]">
+							<h3 className="font-semibold">{entry.title}</h3>
+							<p className="mt-2 text-sm leading-6 text-[color:var(--study-muted)] line-clamp-2">
 								{entry.excerpt}
 							</p>
 						</div>
-						<p className="font-mono text-sm text-[color:var(--study-muted)]">
+						<p className="text-xs font-mono text-[color:var(--study-muted)] whitespace-nowrap">
 							{entry.mood}/{entry.energy}/{entry.progress}
 						</p>
 					</div>
@@ -2285,32 +2306,32 @@ function GridDashboardPage() {
 		<div className="space-y-5">
 			<PageHeading
 				title="Dashboard"
-				note="A tighter system for trend, activity, and archive."
+				note="Compact grid with key metrics and charts."
 			/>
 			<div className="grid gap-5 xl:grid-cols-12">
-				<Panel title="Trend" className="xl:col-span-8 bg-[color:var(--study-surface-alt)]">
+				<Panel title="Trend" className="xl:col-span-8">
 					<TrendChart />
 				</Panel>
-				<Panel title="Activity" className="xl:col-span-4 bg-[color:var(--study-surface-alt)]">
+				<Panel title="Activity" className="xl:col-span-4">
 					<ActivityGrid compact />
 				</Panel>
-				<Panel title="Averages" className="xl:col-span-4 bg-[color:var(--study-surface-alt)]">
+				<Panel title="Averages" className="xl:col-span-3">
 					<MetricsSummary compact />
 				</Panel>
-				<Panel title="Goals" className="xl:col-span-4 bg-[color:var(--study-surface-alt)]">
+				<Panel title="Goals" className="xl:col-span-3">
 					<GoalList dense />
 				</Panel>
-				<Panel title="Recent" className="xl:col-span-4 bg-[color:var(--study-surface-alt)]">
+				<Panel title="Recent" className="xl:col-span-6">
 					<div className="space-y-3">
 						{studyEntries.slice(0, 3).map((entry) => (
 							<div
 								key={entry.date}
-								className="border-t border-[color:var(--study-border)] pt-3 first:border-t-0 first:pt-0"
+								className="grid gap-2 border-t border-[color:var(--study-border)] pt-3 first:border-t-0 first:pt-0 md:grid-cols-[80px_minmax(0,1fr)]"
 							>
-								<p className="text-sm font-medium">{entry.title}</p>
-								<p className="mt-1 font-mono text-xs text-[color:var(--study-muted)]">
+								<p className="text-xs font-mono text-[color:var(--study-muted)]">
 									{entry.date}
 								</p>
+								<p className="font-medium text-sm">{entry.title}</p>
 							</div>
 						))}
 					</div>
