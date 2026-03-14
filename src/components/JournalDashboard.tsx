@@ -227,7 +227,6 @@ export default function JournalDashboard({
 			primaryGoal?.title ||
 			"Direction, writing, and review in one place.";
 	const pulseSummary = describePulse(reflectionDraft);
-	const patternSummary = describePattern(metrics.averageProgress, metrics.streak);
 
 	async function handleGoalSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -377,9 +376,6 @@ export default function JournalDashboard({
 									<p className="section-kicker">Write</p>
 									<h2 className="section-title">Reflection</h2>
 								</div>
-								<p className="section-note section-note-inline">
-									Start with the next step, then write the honest version.
-								</p>
 							</div>
 
 							<div className="field-grid">
@@ -394,7 +390,7 @@ export default function JournalDashboard({
 										}))
 									}
 									placeholder={
-										primaryGoal?.nextStep ?? "The smallest step that matters..."
+										primaryGoal?.nextStep ?? "The smallest step that matters…"
 									}
 								/>
 
@@ -427,7 +423,7 @@ export default function JournalDashboard({
 											reflection: value,
 										}))
 									}
-									placeholder="What felt true today?..."
+									placeholder="What felt true today?…"
 									rows={10}
 									variant="entry"
 								/>
@@ -448,7 +444,7 @@ export default function JournalDashboard({
 														summary: value,
 													}))
 												}
-												placeholder="The shape of the day..."
+												placeholder="The shape of the day…"
 												rows={4}
 											/>
 											<TextAreaField
@@ -461,7 +457,7 @@ export default function JournalDashboard({
 														tomorrowFocus: value,
 													}))
 												}
-												placeholder="How tomorrow should start..."
+												placeholder="How tomorrow should start…"
 												rows={4}
 											/>
 										</div>
@@ -477,7 +473,7 @@ export default function JournalDashboard({
 														win: value,
 													}))
 												}
-												placeholder="What counted as a win..."
+												placeholder="What counted as a win…"
 												rows={3}
 											/>
 											<TextAreaField
@@ -490,7 +486,7 @@ export default function JournalDashboard({
 														blocker: value,
 													}))
 												}
-												placeholder="What got in the way..."
+												placeholder="What got in the way…"
 												rows={3}
 											/>
 										</div>
@@ -526,9 +522,6 @@ export default function JournalDashboard({
 									<p className="section-kicker">Momentum</p>
 									<h2 className="section-title">Recent Pattern</h2>
 								</div>
-								<p className="section-note section-note-inline">
-									{patternSummary}
-								</p>
 							</div>
 							<div className="pattern-strip-grid">
 								<InlineMetric
@@ -654,7 +647,7 @@ export default function JournalDashboard({
 														title: value,
 													}));
 												}}
-												placeholder="What are you aiming at?..."
+												placeholder="What are you aiming at?…"
 												error={goalTitleError}
 											/>
 											<InputField
@@ -667,7 +660,7 @@ export default function JournalDashboard({
 														nextStep: value,
 													}))
 												}
-												placeholder="The next concrete step..."
+												placeholder="The next concrete step…"
 											/>
 										</div>
 
@@ -687,7 +680,7 @@ export default function JournalDashboard({
 																area: value,
 															}))
 														}
-														placeholder="Work, health, personal..."
+														placeholder="Work, health, personal…"
 													/>
 													<SelectField
 														label="Horizon"
@@ -717,7 +710,7 @@ export default function JournalDashboard({
 															why: value,
 														}))
 													}
-													placeholder="Why this matters..."
+													placeholder="Why this matters…"
 													rows={4}
 												/>
 											</div>
@@ -869,44 +862,6 @@ export default function JournalDashboard({
 							</div>
 						</section>
 
-						<section className="section-shell section-shell-compact sidebar-card">
-							<div className="section-head">
-								<div>
-									<p className="section-kicker">Support</p>
-									<h2 className="section-title">If You Are Stuck</h2>
-								</div>
-							</div>
-							<p className="section-note">{promptHeadline}</p>
-							<div className="compact-stack">
-								{visiblePrompts.map((prompt) => (
-									<button
-										type="button"
-										key={prompt}
-										onClick={() => insertPrompt(prompt)}
-										className="prompt-button"
-									>
-										{prompt}
-									</button>
-								))}
-							</div>
-							{morePrompts.length > 0 ? (
-								<details className="details-shell">
-									<summary className="details-summary">More questions</summary>
-									<div className="details-panel compact-stack">
-										{morePrompts.map((prompt) => (
-											<button
-												key={prompt}
-												type="button"
-												onClick={() => insertPrompt(prompt)}
-												className="prompt-button"
-											>
-												{prompt}
-											</button>
-										))}
-									</div>
-								</details>
-							) : null}
-						</section>
 					</aside>
 				</div>
 			</div>
@@ -959,10 +914,10 @@ function optionalText(value: string) {
 function describePulse(reflection: ReflectionDraft) {
 	const moodText =
 		reflection.mood >= 4
-			? "steady"
+			? "steady mood"
 			: reflection.mood <= 2
-				? "heavy"
-				: "mixed";
+				? "heavy mood"
+				: "mixed mood";
 	const energyText =
 		reflection.energy >= 4
 			? "strong energy"
@@ -971,27 +926,12 @@ function describePulse(reflection: ReflectionDraft) {
 				: "moderate energy";
 	const progressText =
 		reflection.progress >= 4
-			? "Momentum is real today."
+			? "clear forward movement"
 			: reflection.progress <= 2
-				? "Keep the next step small and concrete."
-				: "There is movement, but it needs a cleaner next step.";
+				? "a next step that should stay small"
+				: "movement that still needs a clearer next step";
 
-	return `Mood feels ${moodText}, ${energyText}, and ${progressText}`;
-}
-
-function describePattern(
-	progress: number | null,
-	streak: number,
-) {
-	if (progress !== null && progress >= 4) {
-		return `The recent streak is turning into real momentum across ${streak} days.`;
-	}
-
-	if (progress !== null && progress <= 2) {
-		return "Progress has been harder to lock in, so the page should bias toward one clear next step.";
-	}
-
-	return "Recent check-ins show movement, but clarity matters more than adding more volume.";
+	return `${moodText}, ${energyText}, and ${progressText}.`;
 }
 
 function InlineMetric({

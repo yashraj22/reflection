@@ -1036,7 +1036,7 @@ pre code {
 
 @media (min-width: 1140px) {
 	.dashboard-grid {
-		grid-template-columns: minmax(0, 2fr) 18rem;
+		grid-template-columns: minmax(0, 2.25fr) 15rem;
 	}
 
 	.dashboard-sidebar {
