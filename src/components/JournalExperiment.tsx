@@ -1,7 +1,13 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import type { Dispatch, FormEvent, ReactNode, SetStateAction } from "react";
+import type {
+	Dispatch,
+	FormEvent,
+	ReactNode,
+	RefObject,
+	SetStateAction,
+} from "react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { api } from "../../convex/_generated/api";
 import { formatDisplayDate, getTodayDateKey } from "../lib/date";
@@ -75,6 +81,18 @@ const EMPTY_REFLECTION: ReflectionDraft = {
 
 const AUTO_SAVE_DELAY_MS = 700;
 
+const EXPERIMENT_LINKS: Array<{
+	to: "/" | "/11" | "/12" | "/13" | "/14" | "/15";
+	label: string;
+}> = [
+	{ to: "/", label: "Main journal" },
+	{ to: "/11", label: "Focus First" },
+	{ to: "/12", label: "Guided Start" },
+	{ to: "/13", label: "Wide Compose" },
+	{ to: "/14", label: "Step Flow" },
+	{ to: "/15", label: "Review Rail" },
+];
+
 const VARIANT_META: Record<
 	VariantId,
 	{ name: string; note: string; width: string }
@@ -116,7 +134,9 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 	const createGoal = useConvexMutation(api.journal.createGoal);
 	const setGoalStatus = useConvexMutation(api.journal.setGoalStatus);
 
+	const reflectionRef = useRef<HTMLTextAreaElement>(null);
 	const saveRequestRef = useRef(0);
+	const pendingSelectionRef = useRef<number | null>(null);
 	const [goalDraft, setGoalDraft] = useState<GoalDraft>(EMPTY_GOAL);
 	const [reflectionDraft, setReflectionDraft] =
 		useState<ReflectionDraft>(EMPTY_REFLECTION);
@@ -129,6 +149,8 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 	const [goalErrorMessage, setGoalErrorMessage] = useState<string | null>(null);
 	const [goalActionId, setGoalActionId] = useState<string | null>(null);
 	const [isAutoSavingReflection, setAutoSavingReflection] = useState(false);
+	const [promptAnnouncement, setPromptAnnouncement] = useState("");
+	const [confirmingGoalId, setConfirmingGoalId] = useState<string | null>(null);
 	const [isSavingGoal, startSavingGoal] = useTransition();
 
 	useEffect(() => {
@@ -139,10 +161,55 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 		setStatusMessage(`Loaded ${formatDisplayDate(todayKey)}.`);
 	}, [todayReflection, todayKey]);
 
+	useEffect(() => {
+		if (pendingSelectionRef.current === null) {
+			return;
+		}
+
+		const nextSelection = pendingSelectionRef.current;
+		pendingSelectionRef.current = null;
+
+		window.requestAnimationFrame(() => {
+			const textarea = reflectionRef.current;
+			if (!textarea) {
+				return;
+			}
+
+			textarea.focus();
+			textarea.setSelectionRange(nextSelection, nextSelection);
+		});
+	}, [reflectionDraft.reflection]);
+
+	useEffect(() => {
+		if (!promptAnnouncement) {
+			return;
+		}
+
+		const timeoutId = window.setTimeout(() => setPromptAnnouncement(""), 1400);
+		return () => window.clearTimeout(timeoutId);
+	}, [promptAnnouncement]);
+
+	const hasGoalDraft = hasGoalInput(goalDraft);
 	const hasUnsavedReflection = !reflectionDraftsEqual(
 		reflectionDraft,
 		savedReflectionDraft,
 	);
+	const hasUnsavedChanges =
+		hasGoalDraft || hasUnsavedReflection || isAutoSavingReflection;
+
+	useEffect(() => {
+		if (!hasUnsavedChanges) {
+			return;
+		}
+
+		const onBeforeUnload = (event: BeforeUnloadEvent) => {
+			event.preventDefault();
+			event.returnValue = "";
+		};
+
+		window.addEventListener("beforeunload", onBeforeUnload);
+		return () => window.removeEventListener("beforeunload", onBeforeUnload);
+	}, [hasUnsavedChanges]);
 
 	useEffect(() => {
 		if (!hasUnsavedReflection) {
@@ -228,12 +295,21 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 	const visibleStatus = reflectionErrorMessage ?? statusMessage;
 
 	function insertPrompt(prompt: string) {
+		const input = reflectionRef.current;
+		const currentValue = reflectionDraft.reflection;
+		const start = input?.selectionStart ?? currentValue.length;
+		const end = input?.selectionEnd ?? currentValue.length;
+		const prefix = currentValue.slice(0, start);
+		const suffix = currentValue.slice(end);
+		const needsGap = prefix.length > 0 && !prefix.endsWith("\n\n");
+		const insertion = `${needsGap ? "\n\n" : ""}${prompt}\n\n`;
+		pendingSelectionRef.current = prefix.length + insertion.length;
+
 		setReflectionDraft((current) => ({
 			...current,
-			reflection: current.reflection.trim()
-				? `${current.reflection.trim()}\n\n${prompt}`
-				: `${prompt}\n\n`,
+			reflection: `${prefix}${insertion}${suffix}`,
 		}));
+		setPromptAnnouncement("Prompt added to reflection.");
 	}
 
 	function updateDraft<K extends keyof ReflectionDraft>(
@@ -275,20 +351,12 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 		goalId: string,
 		status: "paused" | "completed",
 	) {
-		if (status === "completed") {
-			const shouldContinue = window.confirm(
-				"Complete this goal? You can still find it in history.",
-			);
-			if (!shouldContinue) {
-				return;
-			}
-		}
-
 		setGoalErrorMessage(null);
 		setGoalActionId(goalId);
 
 		try {
 			await setGoalStatus({ goalId: goalId as never, status });
+			setConfirmingGoalId(null);
 			setStatusMessage(status === "paused" ? "Goal paused." : "Goal completed.");
 		} catch (error) {
 			setGoalErrorMessage(
@@ -305,6 +373,8 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 			reflectionDraft={reflectionDraft}
 			updateDraft={updateDraft}
 			insertPrompt={insertPrompt}
+			textareaRef={reflectionRef}
+			promptAnnouncement={promptAnnouncement}
 			primaryPrompt={promptQuestions[0] ?? null}
 			morePrompts={promptQuestions.slice(1)}
 			errorMessage={reflectionErrorMessage}
@@ -336,7 +406,12 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 	);
 
 	const promptPanel = (
-		<Section title="Questions">
+		<CollapsibleSection
+			id={`experiment-${variant}-questions`}
+			title="Questions"
+			summary="Optional prompts for when the page needs a nudge."
+			defaultOpen={variant === 12}
+		>
 			<div className="grid gap-3">
 				{promptQuestions.map((prompt) => (
 					<button
@@ -349,7 +424,7 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 					</button>
 				))}
 			</div>
-		</Section>
+		</CollapsibleSection>
 	);
 
 	const goalPanel = (
@@ -360,13 +435,20 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 			onSubmit={handleGoalSubmit}
 			onStatusChange={handleGoalStatusChange}
 			goalActionId={goalActionId}
+			confirmingGoalId={confirmingGoalId}
+			setConfirmingGoalId={setConfirmingGoalId}
 			isSavingGoal={isSavingGoal}
 			errorMessage={goalErrorMessage}
 		/>
 	);
 
 	const contextPanel = (
-		<Section title="Context">
+		<CollapsibleSection
+			id={`experiment-${variant}-context`}
+			title="Context"
+			summary="Recent lines that help you orient without reading everything."
+			defaultOpen={variant === 15}
+		>
 			{contextLines.length > 0 ? (
 				<div className="compact-stack">
 					{contextLines.map((line) => (
@@ -378,11 +460,15 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 			) : (
 				<p className="section-note">No context yet.</p>
 			)}
-		</Section>
+		</CollapsibleSection>
 	);
 
 	const recentPanel = (
-		<Section title="Recent">
+		<CollapsibleSection
+			id={`experiment-${variant}-recent`}
+			title="Recent"
+			summary="A short review rail instead of a full archive."
+		>
 			<ul className="list-reset rule-list">
 				{recentReflections.map((entry) => (
 					<li key={entry._id} className="simple-row">
@@ -394,11 +480,16 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 					</li>
 				))}
 			</ul>
-		</Section>
+		</CollapsibleSection>
 	);
 
 	const detailPanel = (
-		<Section title="More">
+		<CollapsibleSection
+			id={`experiment-${variant}-follow-up`}
+			title="Follow-up"
+			summary="Secondary fields that help after the main writing is down."
+			defaultOpen={variant === 14}
+		>
 			<div className="field-grid">
 				<TextAreaField
 					label="Summary"
@@ -435,7 +526,7 @@ export default function JournalExperiment({ variant }: { variant: VariantId }) {
 					/>
 				</div>
 			</div>
-		</Section>
+		</CollapsibleSection>
 	);
 
 	return (
@@ -624,7 +715,10 @@ function ExperimentHeader({
 						</p>
 					</div>
 				</div>
-				<div className="space-y-2 text-sm text-[var(--text-muted)] xl:text-right">
+				<div
+					className="space-y-2 text-sm text-[var(--text-muted)] xl:text-right"
+					aria-live="polite"
+				>
 					<p>{dateLabel}</p>
 					<p>{status}</p>
 				</div>
@@ -643,28 +737,23 @@ function ExperimentHeader({
 }
 
 function RouteSwitcher({ active }: { active: VariantId }) {
-	const items: Array<{ to: string; label: string }> = [
-		{ to: "/", label: "/" },
-		{ to: "/11", label: "/11" },
-		{ to: "/12", label: "/12" },
-		{ to: "/13", label: "/13" },
-		{ to: "/14", label: "/14" },
-		{ to: "/15", label: "/15" },
-	];
-
 	return (
-		<nav aria-label="Experiments" className="flex flex-wrap gap-4 text-sm">
-			{items.map((item) => (
+		<nav aria-label="Experiments" className="flex flex-wrap gap-2 text-sm">
+			{EXPERIMENT_LINKS.map((item) => (
 				<Link
 					key={item.to}
 					to={item.to}
-					className={
+					className={`inline-flex min-h-11 items-center rounded-full border px-3 py-2 transition-colors ${
 						item.to === `/${active}`
-							? "text-[var(--text)]"
-							: "text-[var(--text-muted)] hover:text-[var(--text)]"
-					}
+							? "border-[var(--accent)] bg-[var(--surface)] text-[var(--text)]"
+							: "border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)]"
+					}`}
+					title={item.label}
 				>
-					{item.label}
+					<span className="font-mono text-[0.78rem]">
+						{item.to === "/" ? "/" : item.to}
+					</span>
+					<span className="ml-2">{item.label}</span>
 				</Link>
 			))}
 		</nav>
@@ -717,11 +806,50 @@ function Section({
 	);
 }
 
+function CollapsibleSection({
+	id,
+	title,
+	summary,
+	children,
+	defaultOpen = false,
+}: {
+	id: string;
+	title: string;
+	summary: string;
+	children: ReactNode;
+	defaultOpen?: boolean;
+}) {
+	const [isOpen, setIsOpen] = useState(defaultOpen);
+
+	return (
+		<section className="section-shell">
+			<div className="support-head">
+				<div>
+					<h2 className="section-title">{title}</h2>
+					<p className="section-note">{summary}</p>
+				</div>
+				<button
+					type="button"
+					className="button-secondary button-secondary-compact"
+					aria-expanded={isOpen}
+					aria-controls={id}
+					onClick={() => setIsOpen((open) => !open)}
+				>
+					{isOpen ? "Hide" : "Open"}
+				</button>
+			</div>
+			{isOpen ? <div id={id}>{children}</div> : null}
+		</section>
+	);
+}
+
 function ComposePanel({
 	primaryGoal,
 	reflectionDraft,
 	updateDraft,
 	insertPrompt,
+	textareaRef,
+	promptAnnouncement,
 	primaryPrompt,
 	morePrompts,
 	errorMessage,
@@ -733,6 +861,8 @@ function ComposePanel({
 		value: ReflectionDraft[K],
 	) => void;
 	insertPrompt: (prompt: string) => void;
+	textareaRef: RefObject<HTMLTextAreaElement | null>;
+	promptAnnouncement: string;
 	primaryPrompt: string | null;
 	morePrompts: string[];
 	errorMessage: string | null;
@@ -766,7 +896,11 @@ function ComposePanel({
 					placeholder="What felt true today?"
 					rows={12}
 					variant="entry"
+					textareaRef={textareaRef}
 				/>
+				<p className="sr-only" aria-live="polite">
+					{promptAnnouncement}
+				</p>
 				{morePrompts.length > 0 ? (
 					<details className="details-shell">
 						<summary className="details-summary">More questions</summary>
@@ -801,6 +935,8 @@ function GoalPanel({
 	onSubmit,
 	onStatusChange,
 	goalActionId,
+	confirmingGoalId,
+	setConfirmingGoalId,
 	isSavingGoal,
 	errorMessage,
 }: {
@@ -810,6 +946,8 @@ function GoalPanel({
 	onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 	onStatusChange: (goalId: string, status: "paused" | "completed") => void;
 	goalActionId: string | null;
+	confirmingGoalId: string | null;
+	setConfirmingGoalId: Dispatch<SetStateAction<string | null>>;
 	isSavingGoal: boolean;
 	errorMessage: string | null;
 }) {
@@ -868,7 +1006,11 @@ function GoalPanel({
 									<button
 										type="button"
 										className="button-secondary"
-										onClick={() => void onStatusChange(goal._id, "completed")}
+										onClick={() =>
+											setConfirmingGoalId((current) =>
+												current === goal._id ? null : goal._id,
+											)
+										}
 										disabled={goalActionId === goal._id}
 									>
 										Done
@@ -877,6 +1019,30 @@ function GoalPanel({
 							</div>
 							{goal.nextStep ? (
 								<p className="item-copy">Next: {goal.nextStep}</p>
+							) : null}
+							{confirmingGoalId === goal._id ? (
+								<div className="goal-confirm-row">
+									<p className="section-note">
+										Complete this goal and move it to history?
+									</p>
+									<div className="goal-row-actions">
+										<button
+											type="button"
+											className="button-secondary button-secondary-compact"
+											onClick={() => setConfirmingGoalId(null)}
+										>
+											Cancel
+										</button>
+										<button
+											type="button"
+											className="button button-compact"
+											onClick={() => void onStatusChange(goal._id, "completed")}
+											disabled={goalActionId === goal._id}
+										>
+											{goalActionId === goal._id ? "Saving..." : "Confirm done"}
+										</button>
+									</div>
+								</div>
 							) : null}
 						</li>
 					))
@@ -960,6 +1126,7 @@ function TextAreaField({
 	placeholder,
 	rows,
 	variant,
+	textareaRef,
 }: {
 	label: string;
 	name: string;
@@ -968,6 +1135,7 @@ function TextAreaField({
 	placeholder: string;
 	rows: number;
 	variant?: "entry";
+	textareaRef?: RefObject<HTMLTextAreaElement | null>;
 }) {
 	return (
 		<div className="field">
@@ -975,6 +1143,7 @@ function TextAreaField({
 				{label}
 			</label>
 			<textarea
+				ref={textareaRef}
 				id={name}
 				name={name}
 				autoComplete="off"
@@ -1023,4 +1192,8 @@ function reflectionDraftsEqual(left: ReflectionDraft, right: ReflectionDraft) {
 function optionalText(value: string) {
 	const trimmed = value.trim();
 	return trimmed ? trimmed : undefined;
+}
+
+function hasGoalInput(goalDraft: GoalDraft) {
+	return goalDraft.title.trim().length > 0 || goalDraft.nextStep.trim().length > 0;
 }
