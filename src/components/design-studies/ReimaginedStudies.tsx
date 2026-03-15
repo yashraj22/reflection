@@ -49,7 +49,18 @@ type ShellProps = {
 
 type DraftState = ReturnType<typeof useDraft>;
 
-const FAMILY_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+const FAMILY_LINKS = [
+	{ id: 1, label: "Study One" },
+	{ id: 2, label: "Ledger" },
+	{ id: 3, label: "Night Desk" },
+	{ id: 4, label: "Day Plan" },
+	{ id: 5, label: "Board" },
+	{ id: 6, label: "Notebook" },
+	{ id: 7, label: "Ribbon" },
+	{ id: 8, label: "Archive" },
+	{ id: 9, label: "Folio" },
+	{ id: 10, label: "Grid" },
+] as const;
 const PAGE_LABELS: { key: PageKey; label: string }[] = [
 	{ key: "today", label: "Today" },
 	{ key: "history", label: "History" },
@@ -694,22 +705,25 @@ function FamilySwitcher({
 	dark?: boolean;
 }) {
 	return (
-		<nav aria-label="Design studies" className="flex flex-wrap gap-3 text-sm">
-			{FAMILY_IDS.map((item) => {
-				const isActive = item === active;
+		<nav aria-label="Design studies" className="flex flex-wrap gap-2 text-sm">
+			{FAMILY_LINKS.map((item) => {
+				const isActive = item.id === active;
 				return (
 					<Link
-						key={item}
-						to={`/${item}`}
+						key={item.id}
+						to={`/${item.id}`}
+						title={item.label}
 						className={cx(
-							"border-b border-transparent pb-0.5 transition-colors",
+							"inline-flex min-h-11 items-center rounded-full border px-3 py-2 transition-colors",
 							dark
-								? "text-[color:var(--study-muted)] hover:text-[color:var(--study-text)]"
-								: "text-[color:var(--study-muted)] hover:text-[color:var(--study-text)]",
-							isActive && "border-current text-[color:var(--study-text)]",
+								? "border-white/12 text-[color:var(--study-muted)] hover:border-white/24 hover:text-[color:var(--study-text)]"
+								: "border-[color:var(--study-border)] text-[color:var(--study-muted)] hover:border-[color:var(--study-accent)] hover:text-[color:var(--study-text)]",
+							isActive &&
+								"border-[color:var(--study-accent)] bg-[color:var(--study-surface)] text-[color:var(--study-text)]",
 						)}
 					>
-						/{item}
+						<span className="font-mono text-[0.78rem]">/{item.id}</span>
+						<span className="ml-2">{item.label}</span>
 					</Link>
 				);
 			})}

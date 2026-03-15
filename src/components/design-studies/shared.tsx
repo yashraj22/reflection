@@ -17,6 +17,19 @@ const activityDayIds = [
 	"sat",
 ] as const;
 
+const STUDY_LINKS = [
+	{ id: 1, label: "Study One" },
+	{ id: 2, label: "Ledger" },
+	{ id: 3, label: "Night Desk" },
+	{ id: 4, label: "Day Plan" },
+	{ id: 5, label: "Board" },
+	{ id: 6, label: "Notebook" },
+	{ id: 7, label: "Ribbon" },
+	{ id: 8, label: "Archive" },
+	{ id: 9, label: "Folio" },
+	{ id: 10, label: "Grid" },
+] as const;
+
 export function DesignSwitcher({
 	active,
 	dark = false,
@@ -25,19 +38,25 @@ export function DesignSwitcher({
 	dark?: boolean;
 }) {
 	const baseClass = dark
-		? "text-white/72 hover:text-white"
-		: "text-black/55 hover:text-black";
-	const activeClass = dark ? "text-white" : "text-black";
+		? "border-white/12 text-white/72 hover:border-white/24 hover:text-white"
+		: "border-black/10 text-black/60 hover:border-black/18 hover:text-black";
+	const activeClass = dark
+		? "border-white/28 bg-white/10 text-white"
+		: "border-black/16 bg-black/[0.04] text-black";
 
 	return (
-		<nav aria-label="Design studies" className="flex flex-wrap gap-4 text-sm">
-			{([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).map((item) => (
+		<nav aria-label="Design studies" className="flex flex-wrap gap-2 text-sm">
+			{STUDY_LINKS.map((item) => (
 				<Link
-					key={item}
-					to={`/${item}`}
-					className={item === active ? activeClass : baseClass}
+					key={item.id}
+					to={`/${item.id}`}
+					title={item.label}
+					className={`inline-flex min-h-11 items-center rounded-full border px-3 py-2 transition-colors ${
+						item.id === active ? activeClass : baseClass
+					}`}
 				>
-					/{item}
+					<span className="font-mono text-[0.78rem]">/{item.id}</span>
+					<span className="ml-2">{item.label}</span>
 				</Link>
 			))}
 		</nav>
@@ -46,18 +65,27 @@ export function DesignSwitcher({
 
 export function SectionLinks({ dark = false }: { dark?: boolean }) {
 	const linkClass = dark
-		? "text-white/65 hover:text-white"
-		: "text-black/55 hover:text-black";
+		? "border-white/12 text-white/70 hover:border-white/24 hover:text-white"
+		: "border-black/10 text-black/60 hover:border-black/18 hover:text-black";
 
 	return (
-		<nav aria-label="Pages" className="flex flex-wrap gap-5 text-sm">
-			<a href="#today" className={linkClass}>
+		<nav aria-label="Pages" className="flex flex-wrap gap-2 text-sm">
+			<a
+				href="#today"
+				className={`inline-flex min-h-11 items-center rounded-full border px-3 py-2 transition-colors ${linkClass}`}
+			>
 				Today
 			</a>
-			<a href="#history" className={linkClass}>
+			<a
+				href="#history"
+				className={`inline-flex min-h-11 items-center rounded-full border px-3 py-2 transition-colors ${linkClass}`}
+			>
 				History
 			</a>
-			<a href="#dashboard" className={linkClass}>
+			<a
+				href="#dashboard"
+				className={`inline-flex min-h-11 items-center rounded-full border px-3 py-2 transition-colors ${linkClass}`}
+			>
 				Dashboard
 			</a>
 		</nav>

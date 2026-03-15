@@ -18,7 +18,7 @@ export default function NotebookShell({ children }: { children?: ReactNode }) {
 						</Link>
 						<nav
 							aria-label="Notebook pages"
-							className="mt-5 flex justify-center gap-6 text-sm text-black/55"
+							className="mt-5 flex flex-wrap justify-center gap-2 text-sm text-black/55"
 						>
 							{[
 								["/6/today", "Today"],
@@ -28,9 +28,10 @@ export default function NotebookShell({ children }: { children?: ReactNode }) {
 								<Link
 									key={to}
 									to={to}
-									className="border-b border-transparent pb-1 hover:border-current hover:text-black"
+									className="inline-flex min-h-11 items-center rounded-full border border-black/10 px-3 py-2 transition-colors hover:border-black/20 hover:text-black"
 									activeProps={{
-										className: "border-b border-current pb-1 text-black",
+										className:
+											"inline-flex min-h-11 items-center rounded-full border border-black/20 bg-black/[0.04] px-3 py-2 text-black",
 									}}
 								>
 									{label}
