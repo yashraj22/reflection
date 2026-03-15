@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import ConvexSetupNotice from "../components/ConvexSetupNotice";
-import HistoryPage from "../components/HistoryPage";
 import { isConvexConfigured } from "../lib/convex";
 
 export const Route = createFileRoute("/history")({
@@ -8,5 +7,5 @@ export const Route = createFileRoute("/history")({
 });
 
 function HistoryRoute() {
-	return isConvexConfigured ? <HistoryPage /> : <ConvexSetupNotice />;
+	return isConvexConfigured ? <Outlet /> : <ConvexSetupNotice />;
 }

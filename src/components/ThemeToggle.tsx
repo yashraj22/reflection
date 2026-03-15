@@ -1,11 +1,17 @@
+import { Monitor, Moon, Sun } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type ThemeMode = "light" | "dark" | "auto";
 const STORAGE_KEY = "northstar-theme:v1";
-const THEME_OPTIONS: Array<{ mode: ThemeMode; label: string }> = [
-	{ mode: "light", label: "Light" },
-	{ mode: "dark", label: "Dark" },
-	{ mode: "auto", label: "Auto" },
+const THEME_OPTIONS: Array<{
+	mode: ThemeMode;
+	label: string;
+	icon: LucideIcon;
+}> = [
+	{ mode: "light", label: "Light", icon: Sun },
+	{ mode: "dark", label: "Dark", icon: Moon },
+	{ mode: "auto", label: "Auto", icon: Monitor },
 ];
 
 function getInitialMode(): ThemeMode {
@@ -77,10 +83,13 @@ export default function ThemeToggle() {
 					key={option.mode}
 					type="button"
 					onClick={() => setMode(option.mode)}
+					aria-label={`Use ${option.label.toLowerCase()} theme`}
 					aria-pressed={mode === option.mode}
 					className={`theme-option ${mode === option.mode ? "is-active" : ""}`}
+					title={option.label}
 				>
-					{option.label}
+					<option.icon className="theme-option-icon" aria-hidden="true" />
+					<span className="sr-only">{option.label}</span>
 				</button>
 			))}
 		</fieldset>

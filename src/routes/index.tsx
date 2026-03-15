@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import ConvexSetupNotice from "../components/ConvexSetupNotice";
-import JournalDashboard from "../components/JournalDashboard";
+import JournalToday from "../components/JournalToday";
+import { isDateKey } from "../lib/date";
 import { isConvexConfigured } from "../lib/convex";
 
 export const Route = createFileRoute("/")({
@@ -13,8 +14,18 @@ export const Route = createFileRoute("/")({
 function Home() {
 	const { date } = Route.useSearch();
 
+	if (date && isDateKey(date)) {
+		return (
+			<Navigate
+				to="/history/$dateKey"
+				params={{ dateKey: date }}
+				replace
+			/>
+		);
+	}
+
 	return isConvexConfigured ? (
-		<JournalDashboard dateKey={date} />
+		<JournalToday />
 	) : (
 		<ConvexSetupNotice />
 	);

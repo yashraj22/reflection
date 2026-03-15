@@ -27,6 +27,7 @@ import { Route as R11RouteImport } from './routes/11'
 import { Route as R10RouteImport } from './routes/10'
 import { Route as R1RouteImport } from './routes/1'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HistoryIndexRouteImport } from './routes/history.index'
 import { Route as R9IndexRouteImport } from './routes/9.index'
 import { Route as R8IndexRouteImport } from './routes/8.index'
 import { Route as R7IndexRouteImport } from './routes/7.index'
@@ -37,6 +38,7 @@ import { Route as R3IndexRouteImport } from './routes/3.index'
 import { Route as R2IndexRouteImport } from './routes/2.index'
 import { Route as R10IndexRouteImport } from './routes/10.index'
 import { Route as R1IndexRouteImport } from './routes/1.index'
+import { Route as HistoryDateKeyRouteImport } from './routes/history.$dateKey'
 import { Route as R9TodayRouteImport } from './routes/9.today'
 import { Route as R9HistoryRouteImport } from './routes/9.history'
 import { Route as R9DashboardRouteImport } from './routes/9.dashboard'
@@ -158,6 +160,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HistoryIndexRoute = HistoryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => HistoryRoute,
+} as any)
 const R9IndexRoute = R9IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -207,6 +214,11 @@ const R1IndexRoute = R1IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => R1Route,
+} as any)
+const HistoryDateKeyRoute = HistoryDateKeyRouteImport.update({
+  id: '/$dateKey',
+  path: '/$dateKey',
+  getParentRoute: () => HistoryRoute,
 } as any)
 const R9TodayRoute = R9TodayRouteImport.update({
   id: '/today',
@@ -377,7 +389,7 @@ export interface FileRoutesByFullPath {
   '/8': typeof R8RouteWithChildren
   '/9': typeof R9RouteWithChildren
   '/about': typeof AboutRoute
-  '/history': typeof HistoryRoute
+  '/history': typeof HistoryRouteWithChildren
   '/1/dashboard': typeof R1DashboardRoute
   '/1/history': typeof R1HistoryRoute
   '/1/today': typeof R1TodayRoute
@@ -408,6 +420,7 @@ export interface FileRoutesByFullPath {
   '/9/dashboard': typeof R9DashboardRoute
   '/9/history': typeof R9HistoryRoute
   '/9/today': typeof R9TodayRoute
+  '/history/$dateKey': typeof HistoryDateKeyRoute
   '/1/': typeof R1IndexRoute
   '/10/': typeof R10IndexRoute
   '/2/': typeof R2IndexRoute
@@ -418,6 +431,7 @@ export interface FileRoutesByFullPath {
   '/7/': typeof R7IndexRoute
   '/8/': typeof R8IndexRoute
   '/9/': typeof R9IndexRoute
+  '/history/': typeof HistoryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -427,7 +441,6 @@ export interface FileRoutesByTo {
   '/14': typeof R14Route
   '/15': typeof R15Route
   '/about': typeof AboutRoute
-  '/history': typeof HistoryRoute
   '/1/dashboard': typeof R1DashboardRoute
   '/1/history': typeof R1HistoryRoute
   '/1/today': typeof R1TodayRoute
@@ -458,6 +471,7 @@ export interface FileRoutesByTo {
   '/9/dashboard': typeof R9DashboardRoute
   '/9/history': typeof R9HistoryRoute
   '/9/today': typeof R9TodayRoute
+  '/history/$dateKey': typeof HistoryDateKeyRoute
   '/1': typeof R1IndexRoute
   '/10': typeof R10IndexRoute
   '/2': typeof R2IndexRoute
@@ -468,6 +482,7 @@ export interface FileRoutesByTo {
   '/7': typeof R7IndexRoute
   '/8': typeof R8IndexRoute
   '/9': typeof R9IndexRoute
+  '/history': typeof HistoryIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -488,7 +503,7 @@ export interface FileRoutesById {
   '/8': typeof R8RouteWithChildren
   '/9': typeof R9RouteWithChildren
   '/about': typeof AboutRoute
-  '/history': typeof HistoryRoute
+  '/history': typeof HistoryRouteWithChildren
   '/1/dashboard': typeof R1DashboardRoute
   '/1/history': typeof R1HistoryRoute
   '/1/today': typeof R1TodayRoute
@@ -519,6 +534,7 @@ export interface FileRoutesById {
   '/9/dashboard': typeof R9DashboardRoute
   '/9/history': typeof R9HistoryRoute
   '/9/today': typeof R9TodayRoute
+  '/history/$dateKey': typeof HistoryDateKeyRoute
   '/1/': typeof R1IndexRoute
   '/10/': typeof R10IndexRoute
   '/2/': typeof R2IndexRoute
@@ -529,6 +545,7 @@ export interface FileRoutesById {
   '/7/': typeof R7IndexRoute
   '/8/': typeof R8IndexRoute
   '/9/': typeof R9IndexRoute
+  '/history/': typeof HistoryIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -581,6 +598,7 @@ export interface FileRouteTypes {
     | '/9/dashboard'
     | '/9/history'
     | '/9/today'
+    | '/history/$dateKey'
     | '/1/'
     | '/10/'
     | '/2/'
@@ -591,6 +609,7 @@ export interface FileRouteTypes {
     | '/7/'
     | '/8/'
     | '/9/'
+    | '/history/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -600,7 +619,6 @@ export interface FileRouteTypes {
     | '/14'
     | '/15'
     | '/about'
-    | '/history'
     | '/1/dashboard'
     | '/1/history'
     | '/1/today'
@@ -631,6 +649,7 @@ export interface FileRouteTypes {
     | '/9/dashboard'
     | '/9/history'
     | '/9/today'
+    | '/history/$dateKey'
     | '/1'
     | '/10'
     | '/2'
@@ -641,6 +660,7 @@ export interface FileRouteTypes {
     | '/7'
     | '/8'
     | '/9'
+    | '/history'
   id:
     | '__root__'
     | '/'
@@ -691,6 +711,7 @@ export interface FileRouteTypes {
     | '/9/dashboard'
     | '/9/history'
     | '/9/today'
+    | '/history/$dateKey'
     | '/1/'
     | '/10/'
     | '/2/'
@@ -701,6 +722,7 @@ export interface FileRouteTypes {
     | '/7/'
     | '/8/'
     | '/9/'
+    | '/history/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -721,7 +743,7 @@ export interface RootRouteChildren {
   R8Route: typeof R8RouteWithChildren
   R9Route: typeof R9RouteWithChildren
   AboutRoute: typeof AboutRoute
-  HistoryRoute: typeof HistoryRoute
+  HistoryRoute: typeof HistoryRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -852,6 +874,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/history/': {
+      id: '/history/'
+      path: '/'
+      fullPath: '/history/'
+      preLoaderRoute: typeof HistoryIndexRouteImport
+      parentRoute: typeof HistoryRoute
+    }
     '/9/': {
       id: '/9/'
       path: '/'
@@ -921,6 +950,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/1/'
       preLoaderRoute: typeof R1IndexRouteImport
       parentRoute: typeof R1Route
+    }
+    '/history/$dateKey': {
+      id: '/history/$dateKey'
+      path: '/$dateKey'
+      fullPath: '/history/$dateKey'
+      preLoaderRoute: typeof HistoryDateKeyRouteImport
+      parentRoute: typeof HistoryRoute
     }
     '/9/today': {
       id: '/9/today'
@@ -1295,6 +1331,19 @@ const R9RouteChildren: R9RouteChildren = {
 
 const R9RouteWithChildren = R9Route._addFileChildren(R9RouteChildren)
 
+interface HistoryRouteChildren {
+  HistoryDateKeyRoute: typeof HistoryDateKeyRoute
+  HistoryIndexRoute: typeof HistoryIndexRoute
+}
+
+const HistoryRouteChildren: HistoryRouteChildren = {
+  HistoryDateKeyRoute: HistoryDateKeyRoute,
+  HistoryIndexRoute: HistoryIndexRoute,
+}
+
+const HistoryRouteWithChildren =
+  HistoryRoute._addFileChildren(HistoryRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R1Route: R1RouteWithChildren,
@@ -1313,7 +1362,7 @@ const rootRouteChildren: RootRouteChildren = {
   R8Route: R8RouteWithChildren,
   R9Route: R9RouteWithChildren,
   AboutRoute: AboutRoute,
-  HistoryRoute: HistoryRoute,
+  HistoryRoute: HistoryRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
